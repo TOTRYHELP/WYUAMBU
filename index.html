@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WYU Monitoring Lending & NPL</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .tab-active { background-color: #2563eb; color: #ffffff; border-color: #2563eb; }
+        .tab-inactive { background-color: #ffffff; color: #64748b; border-color: #e2e8f0; }
+        .tab-inactive:hover { background-color: #f1f5f9; color: #1e293b; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- TOP HEADER NAVBAR -->
+    <header class="bg-[#002855] text-white shadow-xl sticky top-0 z-50 border-b-4 border-[#76bc21]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3.5">
+                <div class="w-11 h-11 bg-white rounded-xl shadow-md flex items-center justify-center text-[#002855]">
+                    <i class="fa-solid fa-building-columns text-2xl"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black px-2 py-0.5 bg-[#76bc21] text-white rounded tracking-wide shadow-xs">PNM</span>
+                        <h1 class="text-xl font-extrabold tracking-tight text-white uppercase">WAHYU HIDAYAT</h1>
+                    </div>
+                    <p class="text-xs text-slate-300 font-medium flex items-center gap-1.5 mt-0.5">
+                        <span class="inline-block w-2 h-2 rounded-full bg-[#76bc21]"></span>
+                        Dashboard Monitoring Lending & Potensi NPL
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <p class="text-[10px] uppercase font-extrabold text-slate-300 tracking-wider">Tanggal</p>
+                    <p id="lastRefreshLog" class="text-xs font-bold text-white">Selasa, 11 Agustus 2026</p>
+                </div>
+
+                <button onclick="fetchAllData()" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-lg border border-white/20 transition active:scale-95 shadow-sm">
+                    <i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i>
+                    <span>RELOAD DATA</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- SPA NAVIGATION TABS -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-1 pb-3 flex gap-3 overflow-x-auto border-t border-white/10 mt-1">
+            <button id="tabBtnLending" onclick="switchTab('lending')" class="tab-active px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition shadow-sm whitespace-nowrap">
+                <i class="fa-solid fa-money-bill-trend-up"></i>
+                <span>LENDING by MPPU</span>
+            </button>
+            <button id="tabBtnNpl" onclick="switchTab('npl')" class="tab-inactive px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition shadow-sm whitespace-nowrap">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>POTENSI NPL</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full space-y-6">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: DASHBOARD MONITORING LENDING        -->
+        <!-- ========================================== -->
+        <div id="viewLending" class="space-y-6">
+            <section class="glass-card rounded-2xl p-5 shadow-sm">
+                <div class="flex items-center gap-2 text-slate-700 font-bold mb-3 text-sm">
+                    <i class="fa-solid fa-filter text-blue-600"></i>
+                    <span>RENTANG TANGGAL</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Start</label>
+                        <input type="date" id="startDate" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Finish</label>
+                        <input type="date" id="endDate" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <button onclick="applyDateFilterLending()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs py-2.5 px-4 rounded-lg shadow transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <span>Terapkan Rentang</span>
+                        </button>
+                        <button onclick="resetDateFilterLending()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs py-2.5 px-3 rounded-lg transition" title="Reset Filter">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- KPI RESUME SUMMARY CARDS -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-blue-600 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Plafond Lending</p>
+                        <h2 class="text-2xl font-extrabold text-slate-900" id="cardTotalLending">0</h2>
+                        <p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-circle-check text-emerald-500"></i> Akumulasi Plafond Lending by MPPU</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 text-xl font-bold">
+                        <i class="fa-solid fa-money-bill-wave"></i>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-emerald-600 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total NOA</p>
+                        <h2 class="text-2xl font-extrabold text-slate-900" id="cardTotalNOA">0 <span class="text-xs font-normal text-slate-500">Rek.</span></h2>
+                        <p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-users-between-lines text-blue-500"></i> NOA by MPPU</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 text-xl font-bold">
+                        <i class="fa-solid fa-users-between-lines"></i>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-amber-500 flex justify-between items-center">
+                    <div>
+                        <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Wilayah Barat</span>
+                        <h2 class="text-2xl font-extrabold text-slate-900" id="cardWilBarat">0</h2>
+                        <p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-map-pin text-amber-500"></i> Wahyu Wibowo</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200/60 flex items-center justify-center text-amber-600 text-xl font-bold">
+                        <i class="fa-solid fa-compass"></i>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-indigo-600 flex justify-between items-center">
+                    <div>
+                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Wilayah Timur</span>
+                        <h2 class="text-2xl font-extrabold text-slate-900" id="cardWilTimur">0</h2>
+                        <p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-map-pin text-indigo-500"></i> Hari Agung</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200/60 flex items-center justify-center text-indigo-600 text-xl font-bold">
+                        <i class="fa-solid fa-location-crosshairs"></i>
+                    </div>
+                </div>
+            </section>
+
+            <!-- LEADERBOARDS & RANKING -->
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card rounded-2xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-4 border-b pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="p-2 rounded-lg bg-amber-100 text-amber-700"><i class="fa-solid fa-trophy"></i></span>
+                            <h3 class="font-bold text-slate-800 text-sm uppercase">TOP 3 Unit Lending</h3>
+                        </div>
+                    </div>
+                    <div id="topUnitCards" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="text-center py-6 text-slate-400 text-xs col-span-3">Loading...</div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-4 border-b pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="p-2 rounded-lg bg-indigo-100 text-indigo-700"><i class="fa-solid fa-award"></i></span>
+                            <h3 class="font-bold text-slate-800 text-sm uppercase">TOP 3 AOM Lending</h3>
+                        </div>
+                    </div>
+                    <div id="topAomCards" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="text-center py-6 text-slate-400 text-xs col-span-3">Loading...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RANKING TABLES -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass-card rounded-2xl p-5 shadow-sm flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-building text-blue-600"></i> KLASEMEN UNIT
+                        </h3>
+                        <span class="text-xs text-slate-400 font-medium" id="unitCount">0 Unit</span>
+                    </div>
+                    <div class="overflow-y-auto custom-scrollbar flex-grow max-h-[460px]">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100 text-slate-600 font-semibold sticky top-0 z-10 shadow-xs">
+                                <tr>
+                                    <th class="p-2.5 text-center w-12">Rank.</th>
+                                    <th class="p-2.5">Unit Kerja</th>
+                                    <th class="p-2.5 text-center">NOA</th>
+                                    <th class="p-2.5 text-right">Total Lending</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableRankingUnit" class="divide-y divide-slate-100">
+                                <tr><td colspan="4" class="text-center py-6 text-slate-400">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-5 shadow-sm flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-user-tie text-blue-600"></i> KLASEMEN AOM
+                        </h3>
+                        <span class="text-xs text-slate-400 font-medium" id="aomCount">0 Personel</span>
+                    </div>
+                    <div class="overflow-y-auto custom-scrollbar flex-grow max-h-[460px]">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100 text-slate-600 font-semibold sticky top-0 z-10 shadow-xs">
+                                <tr>
+                                    <th class="p-2.5 text-center w-12">Rank.</th>
+                                    <th class="p-2.5">Nama AOM</th>
+                                    <th class="p-2.5 text-center">NOA</th>
+                                    <th class="p-2.5 text-right">Total Lending</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableRankingAom" class="divide-y divide-slate-100">
+                                <tr><td colspan="4" class="text-center py-6 text-slate-400">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TABEL RINCIAN LENDING -->
+            <section class="glass-card rounded-2xl p-5 shadow-sm">
+                <div class="flex flex-wrap justify-between items-center gap-3 mb-4 border-b pb-3">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-blue-600"></i> Detail Data Lending
+                    </h3>
+                    <span class="text-xs font-semibold px-3 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-200" id="recordCount">0 Transaksi Found</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Unit Kerja</label>
+                        <select id="filterUnit" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="">-- Semua Unit --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">AOM</label>
+                        <input type="text" id="filterAom" list="aomOptions" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ketik / Pilih Nama AOM...">
+                        <datalist id="aomOptions"></datalist>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Start</label>
+                        <input type="date" id="filterDetailStartDate" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Finish</label>
+                        <input type="date" id="filterDetailEndDate" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div id="filterResumeCard" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5 p-4 bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white rounded-2xl shadow-md border border-emerald-500/30">
+                    <div class="flex items-center gap-3.5 bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/10">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-file-invoice"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-emerald-300 uppercase tracking-widest">Total NOA</p>
+                            <p id="filteredNoa" class="text-xl font-black text-white mt-0.5">0 <span class="text-xs font-normal text-emerald-200">Rekening</span></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3.5 bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/10">
+                        <div class="w-10 h-10 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-400/30 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-money-bill-trend-up"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-teal-300 uppercase tracking-widest">Total Plafond</p>
+                            <p id="filteredPlafond" class="text-xl font-black text-white mt-0.5">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar max-h-96 rounded-lg border border-slate-200">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-800 text-white font-semibold sticky top-0 z-10">
+                            <tr>
+                                <th class="p-3 text-center">No</th>
+                                <th class="p-3">Tanggal MPPU</th>
+                                <th class="p-3">Unit</th>
+                                <th class="p-3 text-center">Kode</th>
+                                <th class="p-3">AOM</th>
+                                <th class="p-3">Nama Nasabah</th>
+                                <th class="p-3 text-right">Plafond</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableDetailedData" class="divide-y divide-slate-200 bg-white">
+                            <tr><td colspan="7" class="text-center py-8 text-slate-400">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: DASHBOARD MONITORING POTENSI NPL   -->
+        <!-- ========================================== -->
+        <div id="viewNpl" class="space-y-6 hidden">
+            <!-- FILTER SECTION NPL -->
+            <section class="glass-card rounded-2xl p-5 shadow-sm">
+                <div class="flex items-center gap-2 text-slate-700 font-bold mb-3 text-sm">
+                    <i class="fa-solid fa-filter text-blue-600"></i>
+                    <span>PENCARIAN UNIT DAN NAMA NASABAH (NPL)</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Unit Kerja</label>
+                        <select id="nplFilterUnit" onchange="onNplUnitChange()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="ALL UNIT">ALL UNIT</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Nasabah</label>
+                        <input type="text" id="nplFilterNama" list="nasabahOperatorOptions" autocomplete="off" oninput="applyFiltersNplTableOnly()" placeholder="Ketik / Pilih Nama Nasabah..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <datalist id="nasabahOperatorOptions"></datalist>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="resetFiltersNpl()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>Reset Filter</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- KPI SUMMARY CARDS NPL -->
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- SISA BEBAN (Sheet DATABASE) -->
+                <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-emerald-500">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-folder-open"></i> Sisa Beban
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-xl mb-3">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase">Sisa NOA</p>
+                            <h3 id="nplSisaNoa" class="text-2xl font-extrabold text-slate-900">0</h3>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase">Sisa OS</p>
+                            <h3 id="nplSisaOs" class="text-xl font-extrabold text-slate-900">0</h3>
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-slate-200 flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-500 uppercase">Success Rate (SCR)</span>
+                        <span id="nplSuccessRate" class="text-2xl font-black text-emerald-600">0.00 %</span>
+                    </div>
+                </div>
+
+                <!-- TOTAL BEBAN (Sheet BASEDON) -->
+                <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-blue-600">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs font-bold text-blue-600 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-bullseye"></i> Total Beban
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-xl mb-3">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase">Total NOA</p>
+                            <h3 id="nplTotalNoa" class="text-2xl font-extrabold text-slate-900">0</h3>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase">Total OS</p>
+                            <h3 id="nplTotalOs" class="text-xl font-extrabold text-slate-900">0</h3>
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-slate-200 text-xs text-slate-400 italic font-medium">
+                        Based On Closing Bulan Lalu
+                    </div>
+                </div>
+            </section>
+
+            <!-- CATEGORY BREAKDOWNS -->
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- COLLECTION -->
+                <div class="glass-card rounded-2xl overflow-hidden shadow-sm border-t-4 border-t-emerald-500">
+                    <div class="bg-emerald-500 text-white px-4 py-3 font-bold text-xs uppercase tracking-wider flex justify-between items-center">
+                        <span>COLLECTION</span>
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div class="p-4 space-y-2 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-500">Total NOA</span><span id="colTotalNoa" class="font-bold">0</span></div>
+                        <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-500">Total OS</span><span id="colTotalOs" class="font-bold">0</span></div>
+                        <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-500">Sisa NOA</span><span id="colSisaNoa" class="font-bold">0</span></div>
+                        <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-500">Sisa OS</span><span id="colSisaOs" class="font-bold">0</span></div>
+                        <div class="flex justify-between pt-2 text-emerald-600 font-extrabold text-sm"><span class="uppercase">Success Rate</span><span id="colSuccessRate">0.00 %</span></div>
+                    </div>
+                </div>
+
+                <!-- 3R / RESTRUKTUR -->
+                <div class="glass-card rounded-2xl overflow-hidden shadow-sm border-t-4 border-t-amber-500">
+                    <div class="bg-amber-500 text-white px-4 py-3 font-bold text-xs uppercase tracking-wider flex justify-between items-center">
+                        <span>3R / RESTRUKTUR</span>
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </div>
+                    <div class="p-4 space-y-2 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-500">Total NOA</span><span id="resTotalNoa" class="font-bold">0</span></div>
+                        <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-500">Total OS</span><span id="resTotalOs" class="font-bold">0</span></div>
+                        <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-500">Sisa NOA</span><span id="resSisaNoa" class="font-bold">0</span></div>
+                        <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-500">Sisa OS</span><span id="resSisaOs" class="font-bold">0</span></div>
+                        <div class="flex justify-between pt-2 text-amber-600 font-extrabold text-sm"><span class="uppercase">Success Rate</span><span id="resSuccessRate">0.00 %</span></div>
+                    </div>
+                </div>
+
+                <!-- FLOW NPL -->
+                <div class="glass-card rounded-2xl overflow-hidden shadow-sm border-t-4 border-t-rose-500">
+                    <div class="bg-rose-500 text-white px-4 py-3 font-bold text-xs uppercase tracking-wider flex justify-between items-center">
+                        <span>FLOW NPL</span>
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div class="p-4 space-y-2 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-500">Total NOA</span><span id="flowTotalNoa" class="font-bold">0</span></div>
+                        <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-500">Total OS</span><span id="flowTotalOs" class="font-bold">0</span></div>
+                        <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-500">Sisa NOA</span><span id="flowSisaNoa" class="font-bold">0</span></div>
+                        <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-500">Sisa OS</span><span id="flowSisaOs" class="font-bold">0</span></div>
+                        <div class="flex justify-between pt-2 text-rose-600 font-extrabold text-sm"><span class="uppercase">Success Rate</span><span id="flowSuccessRate">0.00 %</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TABEL DATA NASABAH NPL -->
+            <section class="glass-card rounded-2xl p-5 shadow-sm">
+                <div class="flex flex-wrap justify-between items-center gap-3 mb-4 border-b pb-3">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-blue-600"></i> Detail Data Nasabah
+                    </h3>
+                    <span class="text-xs font-semibold px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200" id="nplRecordCount">0 Data Terfilter</span>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar max-h-[650px] rounded-lg border border-slate-200">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-800 text-white font-semibold sticky top-0 z-10">
+                            <tr>
+                                <th class="p-3 text-center">No</th>
+                                <th class="p-3">Unit</th>
+                                <th class="p-3">No Rekening</th>
+                                <th class="p-3">Nama Nasabah</th>
+                                <th class="p-3 text-center">Aging</th>
+                                <th class="p-3">Realisasi</th>
+                                <th class="p-3 text-center">JKW</th>
+                                <th class="p-3">JT</th>
+                                <th class="p-3 text-right">Plafond</th>
+                                <th class="p-3 text-right">OS</th>
+                                <th class="p-3 text-right">Angsuran</th>
+                                <th class="p-3 text-right">Sisa DCA</th>
+                                <th class="p-3 text-center">Plan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableNplBody" class="divide-y divide-slate-200 bg-white">
+                            <tr><td colspan="13" class="text-center py-8 text-slate-400">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 text-slate-400 text-xs py-4 text-center mt-auto border-t border-slate-800">
+        <p>&copy; Handled by Wahyu Hidayat & Abdullah M | Dashboard Monitoring Lending (MPPU) & Potensi NPL
+    </footer>
+
+    <!-- SCRIPT APPLICATION -->
+    <script>
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9HeeZaDTl0vmC35uimw300Dok7QWIZAalxVRTDtUUsxGK8bNbVsIYWX0K0-t8TRsKvQ/exec";
+
+        // Global Stores
+        let globalLendingRaw = [];
+        let globalLendingOp = { aomList: [], unitList: [] };
+        let currentLendingDateFiltered = [];
+
+        let globalNplDb = [];
+        let globalNplBasedOn = [];
+        let globalNplOperatorNasabah = []; // Sheet OPERATOR Kolom B
+
+        const UNIT_BARAT = [
+            'Unit Bantul', 'Umbulharjo - Yogyakarta', 'Unit Gamping', 
+            'Unit Mlati-Yogyakarta', 'Unit Dekso', 'Unit Wates', 'Unit Pakem'
+        ];
+        const UNIT_TIMUR = [
+            'Unit Jatinom', 'Unit Wedi', 'Unit Prambanan', 'Unit Klaten Kota', 
+            'Unit Yogyakarta (Syariah)', 'Unit Wonosari', 'Unit Cawas'
+        ];
+
+        function formatRupiah(amount) {
+            return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(amount || 0);
+        }
+
+        function formatDateIndo(val) {
+            if (val === null || val === undefined || val === '') return '-';
+            
+            let dateObj = null;
+            let num = Number(val);
+
+            if (!isNaN(num) && num > 30000 && num < 60000) {
+                dateObj = new Date(Math.round((num - 25569) * 86400 * 1000));
+            } else {
+                dateObj = new Date(val);
+            }
+
+            if (!dateObj || isNaN(dateObj.getTime())) {
+                return val;
+            }
+
+            const months = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGU", "SEP", "OKT", "NOV", "DES"];
+            const day = dateObj.getDate();
+            const month = months[dateObj.getMonth()];
+            const year = dateObj.getFullYear();
+
+            return `${day} ${month} ${year}`;
+        }
+
+        function parseToTimestamp(val) {
+            if (val === null || val === undefined || val === '') return null;
+            let num = Number(val);
+            if (!isNaN(num) && num > 30000 && num < 60000) {
+                return Math.round((num - 25569) * 86400 * 1000);
+            }
+            let parsed = new Date(val);
+            if (!isNaN(parsed.getTime())) {
+                return parsed.getTime();
+            }
+            return null;
+        }
+
+        function updateLastRefreshLog() {
+            const now = new Date();
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            const dayName = days[now.getDay()];
+            const dayNum = now.getDate();
+            const monthName = months[now.getMonth()];
+            const year = now.getFullYear();
+
+            const logEl = document.getElementById('lastRefreshLog');
+            if (logEl) {
+                logEl.textContent = `${dayName}, ${dayNum} ${monthName} ${year}`;
+            }
+        }
+
+        function switchTab(tabName) {
+            const btnLending = document.getElementById('tabBtnLending');
+            const btnNpl = document.getElementById('tabBtnNpl');
+            const viewLending = document.getElementById('viewLending');
+            const viewNpl = document.getElementById('viewNpl');
+
+            if (tabName === 'lending') {
+                btnLending.className = "tab-active px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition shadow-sm whitespace-nowrap";
+                btnNpl.className = "tab-inactive px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition shadow-sm whitespace-nowrap";
+                viewLending.classList.remove('hidden');
+                viewNpl.classList.add('hidden');
+            } else {
+                btnNpl.className = "tab-active px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition shadow-sm whitespace-nowrap";
+                btnLending.className = "tab-inactive px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition shadow-sm whitespace-nowrap";
+                viewNpl.classList.remove('hidden');
+                viewLending.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchAllData();
+
+            // Event Listeners Lending
+            document.getElementById('filterUnit').addEventListener('change', renderLendingDetailedTable);
+            document.getElementById('filterAom').addEventListener('input', renderLendingDetailedTable);
+            document.getElementById('filterDetailStartDate').addEventListener('change', renderLendingDetailedTable);
+            document.getElementById('filterDetailEndDate').addEventListener('change', renderLendingDetailedTable);
+        });
+
+        async function fetchAllData() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            refreshIcon.classList.add('fa-spin');
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    globalLendingRaw = result.lending.database || [];
+                    globalLendingOp = result.lending.operators || { aomList: [], unitList: [] };
+                    
+                    populateLendingFilters();
+                    applyDateFilterLending();
+
+                    // Load NPL Data
+                    globalNplDb = result.npl.database || [];
+                    globalNplBasedOn = result.npl.basedOn || [];
+                    
+                    // PENYEMPURNAAN 1: Pengambilan & penggabungan list nama nasabah dari Sheet OPERATOR Kolom B
+                    let rawNasabahOp = result.npl.nasabahList || result.npl.operatorNasabah || result.nasabahList || result.operatorNasabah || [];
+                    if (!Array.isArray(rawNasabahOp)) rawNasabahOp = [];
+
+                    const nasabahSet = new Set(rawNasabahOp.filter(Boolean));
+                    globalNplDb.forEach(item => {
+                        if (item.nama) nasabahSet.add(item.nama);
+                    });
+
+                    globalNplOperatorNasabah = Array.from(nasabahSet).sort();
+
+                    populateNplFilters(result.npl.unitList || []);
+                    renderNplDashboard();
+                    applyFiltersNplTableOnly();
+
+                    updateLastRefreshLog();
+                } else {
+                    alert('Gagal mengambil data dari server: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Fetch Error:', error);
+            } finally {
+                refreshIcon.classList.remove('fa-spin');
+            }
+        }
+
+        // ==========================================
+        // LENDING FUNCTIONS
+        // ==========================================
+        function populateLendingFilters() {
+            const selectUnit = document.getElementById('filterUnit');
+            const dataListAom = document.getElementById('aomOptions');
+
+            selectUnit.innerHTML = '<option value="">-- Semua Unit --</option>';
+            dataListAom.innerHTML = '';
+
+            globalLendingOp.unitList.forEach(unit => {
+                const opt = document.createElement('option');
+                opt.value = unit;
+                opt.textContent = unit;
+                selectUnit.appendChild(opt);
+            });
+
+            globalLendingOp.aomList.forEach(aom => {
+                const opt = document.createElement('option');
+                opt.value = aom;
+                dataListAom.appendChild(opt);
+            });
+        }
+
+        function applyDateFilterLending() {
+            const startVal = document.getElementById('startDate').value;
+            const endVal = document.getElementById('endDate').value;
+
+            let minBound = startVal ? new Date(startVal + "T00:00:00").getTime() : null;
+            let maxBound = endVal ? new Date(endVal + "T23:59:59").getTime() : null;
+
+            currentLendingDateFiltered = globalLendingRaw.filter(item => {
+                if (!item.tanggal && item.tanggal !== 0) return true;
+                let itemTs = parseToTimestamp(item.tanggal);
+                if (itemTs === null) return true;
+
+                if (minBound !== null && itemTs < minBound) return false;
+                if (maxBound !== null && itemTs > maxBound) return false;
+                return true;
+            });
+
+            renderLendingComponents();
+        }
+
+        function resetDateFilterLending() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            applyDateFilterLending();
+        }
+
+        function renderLendingComponents() {
+            const totalLending = currentLendingDateFiltered.reduce((s, i) => s + (parseFloat(i.plafond) || 0), 0);
+            const totalNOA = currentLendingDateFiltered.length;
+
+            const totalWilBarat = currentLendingDateFiltered.reduce((s, i) => UNIT_BARAT.includes(i.unit) ? s + (parseFloat(i.plafond) || 0) : s, 0);
+            const totalWilTimur = currentLendingDateFiltered.reduce((s, i) => UNIT_TIMUR.includes(i.unit) ? s + (parseFloat(i.plafond) || 0) : s, 0);
+
+            document.getElementById('cardTotalLending').textContent = formatRupiah(totalLending);
+            document.getElementById('cardTotalNOA').innerHTML = `<span class="inline-block border border-slate-200 px-2.5 py-1 rounded-lg bg-slate-50/80">${totalNOA.toLocaleString('id-ID')} <span class="text-xs font-normal text-slate-500">Rek.</span></span>`;
+            document.getElementById('cardWilBarat').textContent = formatRupiah(totalWilBarat);
+            document.getElementById('cardWilTimur').textContent = formatRupiah(totalWilTimur);
+
+            // PENYEMPURNAAN 2: Inisialisasi Seluruh Master Unit Agar Tetap Tampil Meskipun Nilainya 0 Saat Terfilter
+            const unitStats = {};
+            const allMasterUnits = new Set([
+                ...(globalLendingOp.unitList || []),
+                ...UNIT_BARAT,
+                ...UNIT_TIMUR
+            ]);
+
+            allMasterUnits.forEach(unitName => {
+                if (unitName) {
+                    unitStats[unitName] = { unit: unitName, total: 0, noa: 0 };
+                }
+            });
+
+            currentLendingDateFiltered.forEach(i => {
+                const u = i.unit || 'Lainnya';
+                if (!unitStats[u]) unitStats[u] = { unit: u, total: 0, noa: 0 };
+                unitStats[u].total += (parseFloat(i.plafond) || 0);
+                unitStats[u].noa += 1;
+            });
+
+            const sortedUnits = Object.values(unitStats).sort((a,b) => b.total - a.total || b.noa - a.noa);
+
+            // Akumulasi Seluruh Master AOM
+            const aomStats = {};
+            if (globalLendingOp && globalLendingOp.aomList && Array.isArray(globalLendingOp.aomList)) {
+                globalLendingOp.aomList.forEach(aomName => {
+                    if (aomName) {
+                        aomStats[aomName] = { aom: aomName, total: 0, noa: 0 };
+                    }
+                });
+            }
+
+            currentLendingDateFiltered.forEach(i => {
+                const a = i.aom || 'Lainnya';
+                if (!aomStats[a]) aomStats[a] = { aom: a, total: 0, noa: 0 };
+                aomStats[a].total += (parseFloat(i.plafond) || 0);
+                aomStats[a].noa += 1;
+            });
+            const sortedAoms = Object.values(aomStats).sort((a,b) => b.total - a.total || b.noa - a.noa);
+
+            renderTop3Cards('topUnitCards', sortedUnits.slice(0, 3), 'unit');
+            renderTop3Cards('topAomCards', sortedAoms.slice(0, 3), 'aom');
+
+            renderRankingTable('tableRankingUnit', sortedUnits, 'unit');
+            renderRankingTable('tableRankingAom', sortedAoms, 'aom');
+
+            document.getElementById('unitCount').textContent = `${sortedUnits.length} Unit`;
+            document.getElementById('aomCount').textContent = `${sortedAoms.length} Personel`;
+
+            renderLendingDetailedTable();
+        }
+
+        function renderTop3Cards(elementId, topList, type) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+            if (topList.length === 0) {
+                container.innerHTML = `<div class="col-span-3 text-center py-4 text-slate-400 text-xs">Tidak ada data</div>`;
+                return;
+            }
+            
+            const prestigeBadges = [
+                'bg-gradient-to-r from-amber-400 to-yellow-600 text-white shadow-amber-200/50',
+                'bg-gradient-to-r from-slate-300 to-slate-500 text-white shadow-slate-200/50',
+                'bg-gradient-to-r from-amber-700 to-amber-900 text-white shadow-amber-900/30'
+            ];
+
+            topList.forEach((item, index) => {
+                const name = type === 'unit' ? item.unit : item.aom;
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-200/80 shadow-xs rounded-xl p-3 flex flex-col justify-between hover:shadow-md transition";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="w-6 h-6 rounded-lg ${prestigeBadges[index]} flex items-center justify-center text-[10px] font-black shadow-sm">#${index + 1}</span>
+                        <span class="text-[10px] text-slate-600 font-bold px-2 py-0.5 bg-slate-50 border border-slate-200 rounded-md">${item.noa} NOA</span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-xs truncate" title="${name}">${name}</h4>
+                        <p class="text-blue-700 font-extrabold text-xs mt-1">${formatRupiah(item.total)}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderRankingTable(elementId, list, type) {
+            const tbody = document.getElementById(elementId);
+            tbody.innerHTML = '';
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400 text-xs">Tidak ada data</td></tr>`;
+                return;
+            }
+            list.forEach((item, index) => {
+                const name = type === 'unit' ? item.unit : item.aom;
+                const rankNum = index + 1;
+                const tr = document.createElement('tr');
+                
+                let rowBg = "hover:bg-slate-50";
+                let badgeStyle = "bg-slate-100 text-slate-600 border-slate-200";
+                let fontWeight = "font-medium text-slate-800";
+
+                if (rankNum === 1) {
+                    rowBg = "bg-gradient-to-r from-amber-500/10 via-amber-50/20 to-transparent hover:bg-amber-50/50";
+                    badgeStyle = "bg-amber-500 text-white font-black shadow-sm shadow-amber-500/30 border-amber-600";
+                    fontWeight = "font-bold text-amber-950";
+                } else if (rankNum === 2) {
+                    rowBg = "bg-gradient-to-r from-slate-400/10 via-slate-50/20 to-transparent hover:bg-slate-100/50";
+                    badgeStyle = "bg-slate-400 text-white font-bold border-slate-500";
+                    fontWeight = "font-bold text-slate-900";
+                } else if (rankNum === 3) {
+                    rowBg = "bg-gradient-to-r from-amber-800/10 via-amber-50/20 to-transparent hover:bg-amber-100/30";
+                    badgeStyle = "bg-amber-800 text-white font-bold border-amber-900";
+                    fontWeight = "font-bold text-amber-900";
+                } else if (rankNum === 4 || rankNum === 5) {
+                    rowBg = "bg-indigo-50/30 hover:bg-indigo-50/60";
+                    badgeStyle = "bg-indigo-600 text-white font-semibold border-indigo-700";
+                    fontWeight = "font-semibold text-indigo-950";
+                }
+
+                tr.className = `${rowBg} transition border-b border-slate-100/80`;
+                tr.innerHTML = `
+                    <td class="p-2.5 text-center">
+                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md text-[10px] border ${badgeStyle}">${rankNum}</span>
+                    </td>
+                    <td class="p-2.5 ${fontWeight}">${name}</td>
+                    <td class="p-2.5 text-center">
+                        <span class="px-2 py-0.5 bg-white border border-slate-200/90 rounded-md text-[11px] font-bold text-slate-700 shadow-2xs">${item.noa}</span>
+                    </td>
+                    <td class="p-2.5 text-right font-extrabold text-slate-900">${formatRupiah(item.total)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderLendingDetailedTable() {
+            const tbody = document.getElementById('tableDetailedData');
+            const selectedUnit = document.getElementById('filterUnit').value;
+            const selectedAom = document.getElementById('filterAom').value.trim();
+            const startVal = document.getElementById('filterDetailStartDate').value;
+            const endVal = document.getElementById('filterDetailEndDate').value;
+
+            let minBound = startVal ? new Date(startVal + "T00:00:00").getTime() : null;
+            let maxBound = endVal ? new Date(endVal + "T23:59:59").getTime() : null;
+
+            let filtered = currentLendingDateFiltered.filter(item => {
+                if (selectedUnit && item.unit !== selectedUnit) return false;
+                if (selectedAom && !String(item.aom || '').toLowerCase().includes(selectedAom.toLowerCase())) return false;
+                
+                if (minBound !== null || maxBound !== null) {
+                    let itemTs = parseToTimestamp(item.tanggal);
+                    if (itemTs !== null) {
+                        if (minBound !== null && itemTs < minBound) return false;
+                        if (maxBound !== null && itemTs > maxBound) return false;
+                    }
+                }
+                return true;
+            });
+
+            document.getElementById('recordCount').textContent = `${filtered.length} Transaksi Found`;
+            const totalFilteredPlafond = filtered.reduce((s, i) => s + (parseFloat(i.plafond) || 0), 0);
+            
+            document.getElementById('filteredNoa').textContent = filtered.length;
+            document.getElementById('filteredPlafond').textContent = formatRupiah(totalFilteredPlafond);
+
+            tbody.innerHTML = '';
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400 text-xs">Data transaksi tidak ditemukan.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-blue-50/30 transition border-b border-slate-100 text-xs";
+                tr.innerHTML = `
+                    <td class="p-3 text-center text-slate-400 font-medium">${index + 1}</td>
+                    <td class="p-3 font-medium text-slate-600 whitespace-nowrap">${formatDateIndo(item.tanggal)}</td>
+                    <td class="p-3 font-semibold text-slate-800">${item.unit || '-'}</td>
+                    <td class="p-3 text-center font-mono text-slate-500">${item.kode || '-'}</td>
+                    <td class="p-3 font-medium text-slate-700">${item.aom || '-'}</td>
+                    <td class="p-3 font-semibold text-slate-900">${item.nasabah || '-'}</td>
+                    <td class="p-3 text-right font-extrabold text-blue-900 whitespace-nowrap">${formatRupiah(item.plafond || 0)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ==========================================
+        // NPL FUNCTIONS
+        // ==========================================
+        function populateNplFilters(unitList) {
+            const selectUnit = document.getElementById('nplFilterUnit');
+            const dataListNasabah = document.getElementById('nasabahOperatorOptions');
+
+            selectUnit.innerHTML = '<option value="ALL UNIT">ALL UNIT</option>';
+            dataListNasabah.innerHTML = '';
+
+            unitList.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u;
+                opt.textContent = u;
+                selectUnit.appendChild(opt);
+            });
+
+            // PENYEMPURNAAN 1: Pengisian Suggest Datalist dari Sheet OPERATOR Kolom B
+            globalNplOperatorNasabah.forEach(nama => {
+                if (nama) {
+                    const opt = document.createElement('option');
+                    opt.value = nama;
+                    dataListNasabah.appendChild(opt);
+                }
+            });
+        }
+
+        function onNplUnitChange() {
+            renderNplDashboard();
+            applyFiltersNplTableOnly();
+        }
+
+        function renderNplDashboard() {
+            const unitFilter = document.getElementById('nplFilterUnit').value;
+
+            const filteredDb = globalNplDb.filter(item => {
+                return (unitFilter === 'ALL UNIT' || item.unit === unitFilter);
+            });
+
+            const filteredTarget = globalNplBasedOn.filter(item => {
+                return (unitFilter === 'ALL UNIT' || item.unit === unitFilter);
+            });
+
+            const totalNoa = filteredTarget.length;
+            const totalOs = filteredTarget.reduce((s, i) => s + i.os, 0);
+
+            const sisaNoa = filteredDb.length;
+            const sisaOs = filteredDb.reduce((s, i) => s + i.os, 0);
+
+            let successRate = totalOs > 0 ? ((totalOs - sisaOs) / totalOs) * 100 : 0;
+
+            document.getElementById('nplSisaNoa').textContent = sisaNoa;
+            document.getElementById('nplSisaOs').textContent = formatRupiah(sisaOs);
+            document.getElementById('nplSuccessRate').textContent = successRate.toFixed(2) + " %";
+
+            document.getElementById('nplTotalNoa').textContent = totalNoa;
+            document.getElementById('nplTotalOs').textContent = formatRupiah(totalOs);
+
+            updateNplCategory("col", "COLL", filteredDb, filteredTarget);
+            updateNplCategory("res", "3R", filteredDb, filteredTarget);
+            updateNplCategory("flow", "FLOW", filteredDb, filteredTarget);
+        }
+
+        function applyFiltersNplTableOnly() {
+            const unitFilter = document.getElementById('nplFilterUnit').value;
+            const namaFilter = document.getElementById('nplFilterNama').value.toLowerCase().trim();
+
+            const filteredDbTable = globalNplDb.filter(item => {
+                const matchUnit = (unitFilter === 'ALL UNIT' || item.unit === unitFilter);
+                const matchNama = !namaFilter || (item.nama && item.nama.toLowerCase().includes(namaFilter));
+                return matchUnit && matchNama;
+            });
+
+            const tbody = document.getElementById('tableNplBody');
+            tbody.innerHTML = '';
+
+            if (filteredDbTable.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13" class="text-center py-8 text-slate-400 text-xs">Data nasabah tidak ditemukan.</td></tr>`;
+                document.getElementById('nplRecordCount').textContent = `0 Data Terfilter`;
+                return;
+            }
+
+            filteredDbTable.forEach((item, index) => {
+                let badgeClass = "bg-slate-100 text-slate-700";
+                if (item.plan && item.plan.includes('COLL')) badgeClass = "bg-emerald-100 text-emerald-800 border border-emerald-300";
+                else if (item.plan && item.plan.includes('3R')) badgeClass = "bg-amber-100 text-amber-800 border border-amber-300";
+                else if (item.plan && (item.plan.includes('FLOW') || item.plan.includes('NPL'))) badgeClass = "bg-rose-100 text-rose-800 border border-rose-300";
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100 text-xs";
+                tr.innerHTML = `
+                    <td class="p-3 text-center text-slate-400">${index + 1}</td>
+                    <td class="p-3 font-semibold text-slate-800">${item.unit || '-'}</td>
+                    <td class="p-3 font-mono text-slate-500">${item.norek || '-'}</td>
+                    <td class="p-3 font-bold text-slate-900">${item.nama || '-'}</td>
+                    <td class="p-3 text-center">${item.aging || '-'}</td>
+                    <td class="p-3 whitespace-nowrap">${formatDateIndo(item.realisasi)}</td>
+                    <td class="p-3 text-center">${item.jkw || '-'}</td>
+                    <td class="p-3 whitespace-nowrap">${formatDateIndo(item.jt)}</td>
+                    <td class="p-3 text-right font-medium">${formatRupiah(item.plafond)}</td>
+                    <td class="p-3 text-right font-bold text-slate-900">${formatRupiah(item.os)}</td>
+                    <td class="p-3 text-right">${formatRupiah(item.angsuran)}</td>
+                    <td class="p-3 text-right">${formatRupiah(item.sisa_dca)}</td>
+                    <td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold text-[10px] ${badgeClass}">${item.plan || '-'}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('nplRecordCount').textContent = `${filteredDbTable.length} Data Terfilter`;
+        }
+
+        function updateNplCategory(prefix, planKey, activeDb, targetDb) {
+            const activeList = activeDb.filter(i => i.plan && i.plan.includes(planKey));
+            const targetList = targetDb.filter(i => i.plan && i.plan.includes(planKey));
+
+            const totalNoa = targetList.length;
+            const totalOs = targetList.reduce((s, i) => s + i.os, 0);
+            const sisaNoa = activeList.length;
+            const sisaOs = activeList.reduce((s, i) => s + i.os, 0);
+
+            let rate = totalOs > 0 ? ((totalOs - sisaOs) / totalOs) * 100 : 0;
+
+            document.getElementById(prefix + 'TotalNoa').textContent = totalNoa;
+            document.getElementById(prefix + 'TotalOs').textContent = formatRupiah(totalOs);
+            document.getElementById(prefix + 'SisaNoa').textContent = sisaNoa;
+            document.getElementById(prefix + 'SisaOs').textContent = formatRupiah(sisaOs);
+            document.getElementById(prefix + 'SuccessRate').textContent = rate.toFixed(2) + " %";
+        }
+
+        function resetFiltersNpl() {
+            document.getElementById('nplFilterUnit').value = 'ALL UNIT';
+            document.getElementById('nplFilterNama').value = '';
+            renderNplDashboard();
+            applyFiltersNplTableOnly();
+        }
+    </script>
+</body>
+</html>
