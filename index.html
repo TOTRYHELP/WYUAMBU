@@ -693,7 +693,7 @@
             const totalWilTimur = currentLendingDateFiltered.reduce((s, i) => UNIT_TIMUR.includes(i.unit) ? s + (parseFloat(i.plafond) || 0) : s, 0);
 
             document.getElementById('cardTotalLending').textContent = formatRupiah(totalLending);
-            document.getElementById('cardTotalNOA').innerHTML = `<span class="inline-block border border-slate-200 px-2.5 py-1 rounded-lg bg-slate-50/80">${totalNOA.toLocaleString('id-ID')} <span class="text-xs font-normal text-slate-500">Rek.</span></span>`;
+            document.getElementById('cardTotalNOA').innerHTML = `<span class="inline-block border border-slate-200 px-2.5 py-1 rounded-lg bg-slate-50/80">${totalNOA.toLocaleString('id-ID')} <span class="text-xs font-normal text-slate-500"></span></span>`;
             document.getElementById('cardWilBarat').textContent = formatRupiah(totalWilBarat);
             document.getElementById('cardWilTimur').textContent = formatRupiah(totalWilTimur);
 
