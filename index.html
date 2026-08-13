@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         tailwind.config = {
@@ -58,7 +60,7 @@
             <div class="flex items-center gap-4">
                 <div class="text-right hidden sm:block">
                     <p class="text-[10px] uppercase font-extrabold text-slate-300 tracking-wider">Tanggal</p>
-                    <p id="lastRefreshLog" class="text-xs font-bold text-white">Selasa, 11 Agustus 2026</p>
+                    <p id="lastRefreshLog" class="text-xs font-bold text-white">-</p>
                 </div>
 
                 <button onclick="fetchAllData()" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-lg border border-white/20 transition active:scale-95 shadow-sm">
@@ -91,7 +93,7 @@
             <section class="glass-card rounded-2xl p-5 shadow-sm">
                 <div class="flex items-center gap-2 text-slate-700 font-bold mb-3 text-sm">
                     <i class="fa-solid fa-filter text-blue-600"></i>
-                    <span>RENTANG TANGGAL</span>
+                    <span>RENTANG TANGGAL (FILTER UTAMA)</span>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -116,48 +118,72 @@
 
             <!-- KPI RESUME SUMMARY CARDS -->
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- CARD 1: TOTAL PLAFOND LENDING (DINAMIS MENGIKUTI FILTER UTAMA) -->
                 <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-blue-600 flex justify-between items-center">
                     <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Plafond Lending</p>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Lending</p>
                         <h2 class="text-2xl font-extrabold text-slate-900" id="cardTotalLending">0</h2>
-                        <p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-circle-check text-emerald-500"></i> Akumulasi Plafond Lending by MPPU</p>
+                        <p class="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                            <span id="lblTotalLendingText">Akumulasi Plafond Lending</span>
+                        </p>
                     </div>
                     <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 text-xl font-bold">
                         <i class="fa-solid fa-money-bill-wave"></i>
                     </div>
                 </div>
 
+                <!-- CARD 2: TOTAL NOA (DINAMIS MENGIKUTI FILTER UTAMA) -->
                 <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-emerald-600 flex justify-between items-center">
                     <div>
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total NOA</p>
-                        <h2 class="text-2xl font-extrabold text-slate-900" id="cardTotalNOA">0 <span class="text-xs font-normal text-slate-500"></span></h2>
-                        <p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-users-between-lines text-blue-500"></i> NOA by MPPU</p>
+                        <h2 class="text-2xl font-extrabold text-slate-900" id="cardTotalNOA">0</h2>
+                        <p class="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-users-between-lines text-blue-500"></i>
+                            <span id="lblTotalNoaText">NOA by MPPU</span>
+                        </p>
                     </div>
                     <div class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 text-xl font-bold">
                         <i class="fa-solid fa-users-between-lines"></i>
                     </div>
                 </div>
 
+                <!-- CARD 3: LENDING BULAN SEBELUMNYA (DINAMIS MENGIKUTI FILTER UTAMA) -->
                 <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-amber-500 flex justify-between items-center">
                     <div>
-                        <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Wilayah Barat</span>
-                        <h2 class="text-2xl font-extrabold text-slate-900" id="cardWilBarat">0</h2>
-                        <p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-map-pin text-amber-500"></i> Wahyu Wibowo</p>
+                        <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">LENDING BLN SEBELUMNYA</span>
+                        <h2 class="text-2xl font-extrabold text-slate-900" id="cardLendingBlnLalu">0</h2>
+                        <p class="text-[11px] text-slate-500 mt-1 flex items-center gap-1" id="lblLendingBlnLalu"><i class="fa-solid fa-calendar-minus text-amber-500"></i> <span id="lblLendingBlnLaluText">Periode Bulan Lalu</span></p>
                     </div>
                     <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200/60 flex items-center justify-center text-amber-600 text-xl font-bold">
-                        <i class="fa-solid fa-compass"></i>
+                        <i class="fa-solid fa-wallet"></i>
                     </div>
                 </div>
 
+                <!-- CARD 4: NOA BULAN SEBELUMNYA (DINAMIS MENGIKUTI FILTER UTAMA) -->
                 <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-indigo-600 flex justify-between items-center">
                     <div>
-                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Wilayah Timur</span>
-                        <h2 class="text-2xl font-extrabold text-slate-900" id="cardWilTimur">0</h2>
-                        <p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-map-pin text-indigo-500"></i> Hari Agung</p>
+                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">NOA BLN SEBELUMNYA</span>
+                        <h2 class="text-2xl font-extrabold text-slate-900" id="cardNoaBlnLalu">0</h2>
+                        <p class="text-[11px] text-slate-500 mt-1 flex items-center gap-1" id="lblNoaBlnLalu"><i class="fa-solid fa-user-check text-indigo-500"></i> <span id="lblNoaBlnLaluText">Periode Bulan Lalu</span></p>
                     </div>
                     <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200/60 flex items-center justify-center text-indigo-600 text-xl font-bold">
-                        <i class="fa-solid fa-location-crosshairs"></i>
+                        <i class="fa-solid fa-users"></i>
                     </div>
+                </div>
+            </section>
+
+            <!-- GRAFIK LENDING AKUMULASI SETIAP AOM VS BULAN LALU -->
+            <section class="glass-card rounded-2xl p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-4 border-b pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="p-2 rounded-lg bg-blue-100 text-blue-700"><i class="fa-solid fa-chart-line"></i></span>
+                        <h3 class="font-bold text-slate-800 text-sm uppercase">PERBANDINGAN LENDING AOM</h3>
+                    </div>
+                    <span class="text-xs text-slate-400 font-medium"></span>
+                </div>
+                <div class="relative w-full h-80">
+                    <canvas id="chartLendingAom"></canvas>
                 </div>
             </section>
 
@@ -479,12 +505,31 @@
 
     <!-- FOOTER -->
     <footer class="bg-slate-950 text-slate-400 text-xs py-4 text-center mt-auto border-t border-slate-800">
-        <p>&copy; Handled by Wahyu Hidayat & Abdullah M | Dashboard Monitoring Lending (MPPU) & Potensi NPL
+        <p>&copy; Handled by Wahyu Hidayat & Abdullah M | Dashboard Monitoring Lending (MPPU) & Potensi NPL</p>
     </footer>
 
     <!-- SCRIPT APPLICATION -->
     <script>
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9HeeZaDTl0vmC35uimw300Dok7QWIZAalxVRTDtUUsxGK8bNbVsIYWX0K0-t8TRsKvQ/exec";
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4QQmx7dh_zn-yTbK7bcoGZkb2M05nDHJzKAa6CugNrgFZ8rvMXzdpFWuHAt3J6qYZDw/exec";
+
+        // Global Mapping Name Shortener
+        const NAMA_SHORT_MAP = {
+            "ROHMAJI ROHMAJI": "ROHMAJI",
+            "Y ANDIKA WIDI MAHARDIKA": "ANDIKA",
+            "AGUS FRANKY NAINGGOLAN": "FRANKY",
+            "IRHAS FERDIANDHA": "FERDI",
+            "SUHANDI WIDIA PRANATA": "HANDI",
+            "MOCHAMAD HARIS WIDAYATNO": "HARIS",
+            "YUSUF BINTANG SYAIFINUHA": "BINTANG",
+            "KIKI SANTOSO": "KIKI",
+            "KURNIAWAN AGUNG NUGRAHA": "AGUNG"
+        };
+
+        function getShortName(fullName) {
+            if (!fullName) return '';
+            const clean = fullName.trim().toUpperCase();
+            return NAMA_SHORT_MAP[clean] || fullName;
+        }
 
         // Global Stores
         let globalLendingRaw = [];
@@ -493,24 +538,16 @@
 
         let globalNplDb = [];
         let globalNplBasedOn = [];
-        let globalNplOperatorNasabah = []; // Sheet OPERATOR Kolom B
-
-        const UNIT_BARAT = [
-            'Unit Bantul', 'Umbulharjo - Yogyakarta', 'Unit Gamping', 
-            'Unit Mlati-Yogyakarta', 'Unit Dekso', 'Unit Wates', 'Unit Pakem'
-        ];
-        const UNIT_TIMUR = [
-            'Unit Jatinom', 'Unit Wedi', 'Unit Prambanan', 'Unit Klaten Kota', 
-            'Unit Yogyakarta (Syariah)', 'Unit Wonosari', 'Unit Cawas'
-        ];
+        let globalNplOperatorNasabah = []; 
+        let lendingChartInstance = null;
 
         function formatRupiah(amount) {
             return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(amount || 0);
         }
 
+        // FORMAT TANGGAL UTUH DENGAN NAMA BULAN LENGKAP (Digunakan khusus Filter Utama)
         function formatDateIndo(val) {
             if (val === null || val === undefined || val === '') return '-';
-            
             let dateObj = null;
             let num = Number(val);
 
@@ -524,12 +561,48 @@
                 return val;
             }
 
-            const months = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGU", "SEP", "OKT", "NOV", "DES"];
+            const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
             const day = dateObj.getDate();
             const month = months[dateObj.getMonth()];
             const year = dateObj.getFullYear();
 
             return `${day} ${month} ${year}`;
+        }
+
+        // FORMAT TANGGAL SINGKAT DENGAN BULAN DISEDERHANAKAN (Digunakan untuk keterangan Kartu & Chart agar tidak terlalu panjang)
+        function formatDateIndoShort(val) {
+            if (val === null || val === undefined || val === '') return '-';
+            let dateObj = null;
+            let num = Number(val);
+
+            if (!isNaN(num) && num > 30000 && num < 60000) {
+                dateObj = new Date(Math.round((num - 25569) * 86400 * 1000));
+            } else {
+                dateObj = new Date(val);
+            }
+
+            if (!dateObj || isNaN(dateObj.getTime())) {
+                return val;
+            }
+
+            const monthsShort = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
+            const day = dateObj.getDate();
+            const month = monthsShort[dateObj.getMonth()];
+            const year = dateObj.getFullYear();
+
+            return `${day} ${month} ${year}`;
+        }
+
+        // FORMAT TEKS PERIODE RENTANG TANGGAL DENGAN BULAN UTUH (Khusus Filter Utama)
+        function formatRangeLabel(dStart, dEnd) {
+            if (!dStart || !dEnd) return "Periode Bulan Lalu";
+            return `${formatDateIndo(dStart)} s/d ${formatDateIndo(dEnd)}`;
+        }
+
+        // FORMAT TEKS PERIODE RENTANG TANGGAL DENGAN BULAN SINGKAT (Untuk Keterangan Kartu & Chart)
+        function formatRangeLabelShort(dStart, dEnd) {
+            if (!dStart || !dEnd) return "Periode Bulan Lalu";
+            return `${formatDateIndoShort(dStart)} s/d ${formatDateIndoShort(dEnd)}`;
         }
 
         function parseToTimestamp(val) {
@@ -583,7 +656,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             fetchAllData();
 
-            // Event Listeners Lending
+            // Event Listeners Lending Detail
             document.getElementById('filterUnit').addEventListener('change', renderLendingDetailedTable);
             document.getElementById('filterAom').addEventListener('input', renderLendingDetailedTable);
             document.getElementById('filterDetailStartDate').addEventListener('change', renderLendingDetailedTable);
@@ -599,20 +672,19 @@
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    globalLendingRaw = result.lending.database || [];
-                    globalLendingOp = result.lending.operators || { aomList: [], unitList: [] };
+                    globalLendingRaw = result.lendingDatabase || [];
+                    globalLendingOp = result.operators || { aomList: [], unitList: [] };
                     
                     populateLendingFilters();
+                    
+                    // Render Dashboard Lending (Sekaligus Menghitung Cards & Chart Dynamic)
                     applyDateFilterLending();
 
                     // Load NPL Data
-                    globalNplDb = result.npl.database || [];
-                    globalNplBasedOn = result.npl.basedOn || [];
+                    globalNplDb = result.nplDatabase || [];
+                    globalNplBasedOn = result.nplBasedOn || [];
                     
-                    // PENYEMPURNAAN 1: Pengambilan & penggabungan list nama nasabah dari Sheet OPERATOR Kolom B
-                    let rawNasabahOp = result.npl.nasabahList || result.npl.operatorNasabah || result.nasabahList || result.operatorNasabah || [];
-                    if (!Array.isArray(rawNasabahOp)) rawNasabahOp = [];
-
+                    let rawNasabahOp = result.nasabahList || [];
                     const nasabahSet = new Set(rawNasabahOp.filter(Boolean));
                     globalNplDb.forEach(item => {
                         if (item.nama) nasabahSet.add(item.nama);
@@ -620,7 +692,7 @@
 
                     globalNplOperatorNasabah = Array.from(nasabahSet).sort();
 
-                    populateNplFilters(result.npl.unitList || []);
+                    populateNplFilters(globalLendingOp.unitList || []);
                     renderNplDashboard();
                     applyFiltersNplTableOnly();
 
@@ -645,16 +717,16 @@
             selectUnit.innerHTML = '<option value="">-- Semua Unit --</option>';
             dataListAom.innerHTML = '';
 
-            globalLendingOp.unitList.forEach(unit => {
+            (globalLendingOp.unitList || []).forEach(unit => {
                 const opt = document.createElement('option');
                 opt.value = unit;
                 opt.textContent = unit;
                 selectUnit.appendChild(opt);
             });
 
-            globalLendingOp.aomList.forEach(aom => {
+            (globalLendingOp.aomList || []).forEach(aom => {
                 const opt = document.createElement('option');
-                opt.value = aom;
+                opt.value = getShortName(aom);
                 dataListAom.appendChild(opt);
             });
         }
@@ -676,7 +748,72 @@
                 return true;
             });
 
+            // Update Teks Keterangan Sub-Card untuk Card Total Plafond & Total NOA (Format Singkat)
+            if (startVal && endVal) {
+                const dStart = new Date(startVal + "T00:00:00");
+                const dEnd = new Date(endVal + "T23:59:59");
+                const currentRangeLabelShort = formatRangeLabelShort(dStart, dEnd);
+                document.getElementById('lblTotalLendingText').textContent = currentRangeLabelShort;
+                document.getElementById('lblTotalNoaText').textContent = currentRangeLabelShort;
+            } else {
+                document.getElementById('lblTotalLendingText').textContent = "Akumulasi Lending by MPPU";
+                document.getElementById('lblTotalNoaText').textContent = "NOA by MPPU";
+            }
+
+            // Update Card Bulan Lalu & Teks Keterangan Card secara Dinamis
+            renderDynamicPreviousMonthCards(startVal, endVal);
+
             renderLendingComponents();
+        }
+
+        function renderDynamicPreviousMonthCards(startVal, endVal) {
+            let prevMinBound = null;
+            let prevMaxBound = null;
+            let labelTextShort = "Periode Bulan Lalu";
+
+            if (startVal && endVal) {
+                let dStart = new Date(startVal + "T00:00:00");
+                let dEnd = new Date(endVal + "T23:59:59");
+
+                // Geser 1 bulan ke belakang
+                dStart.setMonth(dStart.getMonth() - 1);
+                dEnd.setMonth(dEnd.getMonth() - 1);
+
+                prevMinBound = dStart.getTime();
+                prevMaxBound = dEnd.getTime();
+                labelTextShort = formatRangeLabelShort(dStart, dEnd);
+            } else {
+                // Default jika filter kosong: Bulan lalu penuh relatif terhadap hari ini
+                const now = new Date();
+                let pMonth = now.getMonth() - 1;
+                let pYear = now.getFullYear();
+                if (pMonth < 0) { pMonth = 11; pYear--; }
+
+                let dStart = new Date(pYear, pMonth, 1, 0, 0, 0);
+                let dEnd = new Date(pYear, pMonth + 1, 0, 23, 59, 59);
+
+                prevMinBound = dStart.getTime();
+                prevMaxBound = dEnd.getTime();
+                labelTextShort = formatRangeLabelShort(dStart, dEnd);
+            }
+
+            let totalPlafondPrev = 0;
+            let totalNoaPrev = 0;
+
+            globalLendingRaw.forEach(item => {
+                let ts = parseToTimestamp(item.tanggal);
+                if (ts && ts >= prevMinBound && ts <= prevMaxBound) {
+                    totalPlafondPrev += (parseFloat(item.plafond) || 0);
+                    totalNoaPrev += 1;
+                }
+            });
+
+            document.getElementById('cardLendingBlnLalu').textContent = formatRupiah(totalPlafondPrev);
+            document.getElementById('cardNoaBlnLalu').textContent = totalNoaPrev.toLocaleString('id-ID');
+            
+            // Perbarui Teks Keterangan Sub-Card Bulan Lalu dengan Format Singkat
+            document.getElementById('lblLendingBlnLaluText').textContent = labelTextShort;
+            document.getElementById('lblNoaBlnLaluText').textContent = labelTextShort;
         }
 
         function resetDateFilterLending() {
@@ -689,49 +826,42 @@
             const totalLending = currentLendingDateFiltered.reduce((s, i) => s + (parseFloat(i.plafond) || 0), 0);
             const totalNOA = currentLendingDateFiltered.length;
 
-            const totalWilBarat = currentLendingDateFiltered.reduce((s, i) => UNIT_BARAT.includes(i.unit) ? s + (parseFloat(i.plafond) || 0) : s, 0);
-            const totalWilTimur = currentLendingDateFiltered.reduce((s, i) => UNIT_TIMUR.includes(i.unit) ? s + (parseFloat(i.plafond) || 0) : s, 0);
-
             document.getElementById('cardTotalLending').textContent = formatRupiah(totalLending);
-            document.getElementById('cardTotalNOA').innerHTML = `<span class="inline-block border border-slate-200 px-2.5 py-1 rounded-lg bg-slate-50/80">${totalNOA.toLocaleString('id-ID')} <span class="text-xs font-normal text-slate-500"></span></span>`;
-            document.getElementById('cardWilBarat').textContent = formatRupiah(totalWilBarat);
-            document.getElementById('cardWilTimur').textContent = formatRupiah(totalWilTimur);
+            document.getElementById('cardTotalNOA').textContent = totalNOA.toLocaleString('id-ID');
 
-            // PENYEMPURNAAN 2: Inisialisasi Seluruh Master Unit Agar Tetap Tampil Meskipun Nilainya 0 Saat Terfilter
+            // Klasemen Unit
             const unitStats = {};
-            const allMasterUnits = new Set([
-                ...(globalLendingOp.unitList || []),
-                ...UNIT_BARAT,
-                ...UNIT_TIMUR
-            ]);
+            const masterUnitList = globalLendingOp.unitList || [];
 
-            allMasterUnits.forEach(unitName => {
+            masterUnitList.forEach(unitName => {
                 if (unitName) {
                     unitStats[unitName] = { unit: unitName, total: 0, noa: 0 };
                 }
             });
 
             currentLendingDateFiltered.forEach(i => {
-                const u = i.unit || 'Lainnya';
-                if (!unitStats[u]) unitStats[u] = { unit: u, total: 0, noa: 0 };
-                unitStats[u].total += (parseFloat(i.plafond) || 0);
-                unitStats[u].noa += 1;
+                const u = i.unit || '';
+                if (unitStats[u]) {
+                    unitStats[u].total += (parseFloat(i.plafond) || 0);
+                    unitStats[u].noa += 1;
+                }
             });
 
             const sortedUnits = Object.values(unitStats).sort((a,b) => b.total - a.total || b.noa - a.noa);
 
-            // Akumulasi Seluruh Master AOM
+            // Klasemen AOM
             const aomStats = {};
             if (globalLendingOp && globalLendingOp.aomList && Array.isArray(globalLendingOp.aomList)) {
                 globalLendingOp.aomList.forEach(aomName => {
                     if (aomName) {
-                        aomStats[aomName] = { aom: aomName, total: 0, noa: 0 };
+                        const shortName = getShortName(aomName);
+                        aomStats[shortName] = { aom: shortName, total: 0, noa: 0 };
                     }
                 });
             }
 
             currentLendingDateFiltered.forEach(i => {
-                const a = i.aom || 'Lainnya';
+                const a = getShortName(i.aom || 'Lainnya');
                 if (!aomStats[a]) aomStats[a] = { aom: a, total: 0, noa: 0 };
                 aomStats[a].total += (parseFloat(i.plafond) || 0);
                 aomStats[a].noa += 1;
@@ -747,7 +877,164 @@
             document.getElementById('unitCount').textContent = `${sortedUnits.length} Unit`;
             document.getElementById('aomCount').textContent = `${sortedAoms.length} Personel`;
 
+            renderLendingComparisonChart();
             renderLendingDetailedTable();
+        }
+
+        function renderLendingComparisonChart() {
+            const ctx = document.getElementById('chartLendingAom').getContext('2d');
+            const startVal = document.getElementById('startDate').value;
+            const endVal = document.getElementById('endDate').value;
+
+            // Dapatkan seluruh AOM aktif dari Master dengan Nama Singkat
+            const masterAomList = (globalLendingOp.aomList || []).map(a => getShortName(a));
+
+            let currData = currentLendingDateFiltered;
+            let prevData = [];
+
+            let labelCurr = "Lending Periode Filter";
+            let labelPrev = "Lending Bulan Lalu";
+
+            if (startVal && endVal) {
+                let dCurrStart = new Date(startVal + "T00:00:00");
+                let dCurrEnd = new Date(endVal + "T23:59:59");
+
+                let dPrevStart = new Date(startVal + "T00:00:00");
+                let dPrevEnd = new Date(endVal + "T23:59:59");
+                dPrevStart.setMonth(dPrevStart.getMonth() - 1);
+                dPrevEnd.setMonth(dPrevEnd.getMonth() - 1);
+
+                let pMin = dPrevStart.getTime();
+                let pMax = dPrevEnd.getTime();
+
+                prevData = globalLendingRaw.filter(item => {
+                    let ts = parseToTimestamp(item.tanggal);
+                    return ts && ts >= pMin && ts <= pMax;
+                });
+
+                // Perbarui Teks Legenda Grafik Secara Dinamis (Format Singkat)
+                labelCurr = `${formatRangeLabelShort(dCurrStart, dCurrEnd)}`;
+                labelPrev = `${formatRangeLabelShort(dPrevStart, dPrevEnd)}`;
+            } else {
+                const now = new Date();
+                let pMonth = now.getMonth() - 1;
+                let pYear = now.getFullYear();
+                if (pMonth < 0) { pMonth = 11; pYear--; }
+
+                let dStart = new Date(pYear, pMonth, 1, 0, 0, 0);
+                let dEnd = new Date(pYear, pMonth + 1, 0, 23, 59, 59);
+                let pMin = dStart.getTime();
+                let pMax = dEnd.getTime();
+
+                prevData = globalLendingRaw.filter(item => {
+                    let ts = parseToTimestamp(item.tanggal);
+                    return ts && ts >= pMin && ts <= pMax;
+                });
+
+                labelPrev = `${formatRangeLabelShort(dStart, dEnd)}`;
+            }
+
+            const currAomTotals = {};
+            const prevAomTotals = {};
+
+            masterAomList.forEach(aom => {
+                currAomTotals[aom] = 0;
+                prevAomTotals[aom] = 0;
+            });
+
+            currData.forEach(item => {
+                let aomName = getShortName(item.aom);
+                if (currAomTotals[aomName] !== undefined) {
+                    currAomTotals[aomName] += (parseFloat(item.plafond) || 0);
+                }
+            });
+
+            prevData.forEach(item => {
+                let aomName = getShortName(item.aom);
+                if (prevAomTotals[aomName] !== undefined) {
+                    prevAomTotals[aomName] += (parseFloat(item.plafond) || 0);
+                }
+            });
+
+            const labels = masterAomList;
+            const currDatasetData = labels.map(aom => (currAomTotals[aom] / 1000000).toFixed(2));
+            const prevDatasetData = labels.map(aom => (prevAomTotals[aom] / 1000000).toFixed(2));
+
+            if (lendingChartInstance) {
+                lendingChartInstance.destroy();
+            }
+
+            lendingChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: labelCurr,
+                            data: currDatasetData,
+                            backgroundColor: '#002855', // Tone Biru Header
+                            borderColor: '#001c3d',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        },
+                        {
+                            label: labelPrev,
+                            data: prevDatasetData,
+                            backgroundColor: '#76bc21', // Tone Hijau Header
+                            borderColor: '#5a9019',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: { size: 11, weight: 'bold' },
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.dataset.label}: Rp ${context.raw} Juta`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { 
+                                font: { size: 10, weight: '600' },
+                                maxRotation: 0,
+                                minRotation: 0
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                font: { size: 10 },
+                                callback: function(value) { return value + ' Jt'; }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Akumulasi Lending (Juta Rp)',
+                                font: { size: 11, weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         function renderTop3Cards(elementId, topList, type) {
@@ -765,7 +1052,7 @@
             ];
 
             topList.forEach((item, index) => {
-                const name = type === 'unit' ? item.unit : item.aom;
+                const name = type === 'unit' ? item.unit : getShortName(item.aom);
                 const card = document.createElement('div');
                 card.className = "bg-white border border-slate-200/80 shadow-xs rounded-xl p-3 flex flex-col justify-between hover:shadow-md transition";
                 card.innerHTML = `
@@ -790,7 +1077,7 @@
                 return;
             }
             list.forEach((item, index) => {
-                const name = type === 'unit' ? item.unit : item.aom;
+                const name = type === 'unit' ? item.unit : getShortName(item.aom);
                 const rankNum = index + 1;
                 const tr = document.createElement('tr');
                 
@@ -810,10 +1097,6 @@
                     rowBg = "bg-gradient-to-r from-amber-800/10 via-amber-50/20 to-transparent hover:bg-amber-100/30";
                     badgeStyle = "bg-amber-800 text-white font-bold border-amber-900";
                     fontWeight = "font-bold text-amber-900";
-                } else if (rankNum === 4 || rankNum === 5) {
-                    rowBg = "bg-indigo-50/30 hover:bg-indigo-50/60";
-                    badgeStyle = "bg-indigo-600 text-white font-semibold border-indigo-700";
-                    fontWeight = "font-semibold text-indigo-950";
                 }
 
                 tr.className = `${rowBg} transition border-b border-slate-100/80`;
@@ -843,7 +1126,7 @@
 
             let filtered = currentLendingDateFiltered.filter(item => {
                 if (selectedUnit && item.unit !== selectedUnit) return false;
-                if (selectedAom && !String(item.aom || '').toLowerCase().includes(selectedAom.toLowerCase())) return false;
+                if (selectedAom && !String(getShortName(item.aom) || '').toLowerCase().includes(selectedAom.toLowerCase())) return false;
                 
                 if (minBound !== null || maxBound !== null) {
                     let itemTs = parseToTimestamp(item.tanggal);
@@ -872,10 +1155,10 @@
                 tr.className = "hover:bg-blue-50/30 transition border-b border-slate-100 text-xs";
                 tr.innerHTML = `
                     <td class="p-3 text-center text-slate-400 font-medium">${index + 1}</td>
-                    <td class="p-3 font-medium text-slate-600 whitespace-nowrap">${formatDateIndo(item.tanggal)}</td>
+                    <td class="p-3 font-medium text-slate-600 whitespace-nowrap">${formatDateIndoShort(item.tanggal)}</td>
                     <td class="p-3 font-semibold text-slate-800">${item.unit || '-'}</td>
                     <td class="p-3 text-center font-mono text-slate-500">${item.kode || '-'}</td>
-                    <td class="p-3 font-medium text-slate-700">${item.aom || '-'}</td>
+                    <td class="p-3 font-medium text-slate-700">${getShortName(item.aom) || '-'}</td>
                     <td class="p-3 font-semibold text-slate-900">${item.nasabah || '-'}</td>
                     <td class="p-3 text-right font-extrabold text-blue-900 whitespace-nowrap">${formatRupiah(item.plafond || 0)}</td>
                 `;
@@ -900,7 +1183,6 @@
                 selectUnit.appendChild(opt);
             });
 
-            // PENYEMPURNAAN 1: Pengisian Suggest Datalist dari Sheet OPERATOR Kolom B
             globalNplOperatorNasabah.forEach(nama => {
                 if (nama) {
                     const opt = document.createElement('option');
@@ -979,9 +1261,9 @@
                     <td class="p-3 font-mono text-slate-500">${item.norek || '-'}</td>
                     <td class="p-3 font-bold text-slate-900">${item.nama || '-'}</td>
                     <td class="p-3 text-center">${item.aging || '-'}</td>
-                    <td class="p-3 whitespace-nowrap">${formatDateIndo(item.realisasi)}</td>
+                    <td class="p-3 whitespace-nowrap">${formatDateIndoShort(item.realisasi)}</td>
                     <td class="p-3 text-center">${item.jkw || '-'}</td>
-                    <td class="p-3 whitespace-nowrap">${formatDateIndo(item.jt)}</td>
+                    <td class="p-3 whitespace-nowrap">${formatDateIndoShort(item.jt)}</td>
                     <td class="p-3 text-right font-medium">${formatRupiah(item.plafond)}</td>
                     <td class="p-3 text-right font-bold text-slate-900">${formatRupiah(item.os)}</td>
                     <td class="p-3 text-right">${formatRupiah(item.angsuran)}</td>
