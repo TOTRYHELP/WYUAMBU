@@ -93,16 +93,16 @@
             <section class="glass-card rounded-2xl p-5 shadow-sm">
                 <div class="flex items-center gap-2 text-slate-700 font-bold mb-3 text-sm">
                     <i class="fa-solid fa-filter text-blue-600"></i>
-                    <span>RENTANG TANGGAL (FILTER UTAMA)</span>
+                    <span>RENTANG TANGGAL - LENDING by MPPU</span>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 mb-1">Start</label>
-                        <input type="date" id="startDate" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input type="date" id="startDate" placeholder="1 AGUSTUS 2026" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 mb-1">Finish</label>
-                        <input type="date" id="endDate" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input type="date" id="endDate" placeholder="13 AGUSTUS 2026" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                     <div class="flex items-end gap-2">
                         <button onclick="applyDateFilterLending()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs py-2.5 px-4 rounded-lg shadow transition flex items-center justify-center gap-2">
@@ -118,7 +118,7 @@
 
             <!-- KPI RESUME SUMMARY CARDS -->
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- CARD 1: TOTAL PLAFOND LENDING (DINAMIS MENGIKUTI FILTER UTAMA) -->
+                <!-- CARD 1: TOTAL PLAFOND LENDING -->
                 <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-blue-600 flex justify-between items-center">
                     <div>
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Lending</p>
@@ -133,7 +133,7 @@
                     </div>
                 </div>
 
-                <!-- CARD 2: TOTAL NOA (DINAMIS MENGIKUTI FILTER UTAMA) -->
+                <!-- CARD 2: TOTAL NOA -->
                 <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-emerald-600 flex justify-between items-center">
                     <div>
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total NOA</p>
@@ -148,7 +148,7 @@
                     </div>
                 </div>
 
-                <!-- CARD 3: LENDING BULAN SEBELUMNYA (DINAMIS MENGIKUTI FILTER UTAMA) -->
+                <!-- CARD 3: LENDING BULAN SEBELUMNYA -->
                 <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-amber-500 flex justify-between items-center">
                     <div>
                         <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">LENDING BLN SEBELUMNYA</span>
@@ -160,7 +160,7 @@
                     </div>
                 </div>
 
-                <!-- CARD 4: NOA BULAN SEBELUMNYA (DINAMIS MENGIKUTI FILTER UTAMA) -->
+                <!-- CARD 4: NOA BULAN SEBELUMNYA -->
                 <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-indigo-600 flex justify-between items-center">
                     <div>
                         <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">NOA BLN SEBELUMNYA</span>
@@ -180,7 +180,6 @@
                         <span class="p-2 rounded-lg bg-blue-100 text-blue-700"><i class="fa-solid fa-chart-line"></i></span>
                         <h3 class="font-bold text-slate-800 text-sm uppercase">PERBANDINGAN LENDING AOM</h3>
                     </div>
-                    <span class="text-xs text-slate-400 font-medium"></span>
                 </div>
                 <div class="relative w-full h-80">
                     <canvas id="chartLendingAom"></canvas>
@@ -193,7 +192,7 @@
                     <div class="flex items-center justify-between mb-4 border-b pb-3">
                         <div class="flex items-center gap-2">
                             <span class="p-2 rounded-lg bg-amber-100 text-amber-700"><i class="fa-solid fa-trophy"></i></span>
-                            <h3 class="font-bold text-slate-800 text-sm uppercase">TOP 3 Unit Lending</h3>
+                            <h3 class="font-bold text-slate-800 text-sm uppercase">TOP 3 Lending Unit</h3>
                         </div>
                     </div>
                     <div id="topUnitCards" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -205,7 +204,7 @@
                     <div class="flex items-center justify-between mb-4 border-b pb-3">
                         <div class="flex items-center gap-2">
                             <span class="p-2 rounded-lg bg-indigo-100 text-indigo-700"><i class="fa-solid fa-award"></i></span>
-                            <h3 class="font-bold text-slate-800 text-sm uppercase">TOP 3 AOM Lending</h3>
+                            <h3 class="font-bold text-slate-800 text-sm uppercase">TOP 3 Lending AOM</h3>
                         </div>
                     </div>
                     <div id="topAomCards" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -227,10 +226,10 @@
                         <table class="w-full text-left text-xs">
                             <thead class="bg-slate-100 text-slate-600 font-semibold sticky top-0 z-10 shadow-xs">
                                 <tr>
-                                    <th class="p-2.5 text-center w-12">Rank.</th>
-                                    <th class="p-2.5">Unit Kerja</th>
+                                    <th class="p-2.5 text-center w-12">RANK.</th>
+                                    <th class="p-2.5">UNIT KERJA</th>
                                     <th class="p-2.5 text-center">NOA</th>
-                                    <th class="p-2.5 text-right">Total Lending</th>
+                                    <th class="p-2.5 text-right">TOTAL LENDING</th>
                                 </tr>
                             </thead>
                             <tbody id="tableRankingUnit" class="divide-y divide-slate-100">
@@ -251,10 +250,10 @@
                         <table class="w-full text-left text-xs">
                             <thead class="bg-slate-100 text-slate-600 font-semibold sticky top-0 z-10 shadow-xs">
                                 <tr>
-                                    <th class="p-2.5 text-center w-12">Rank.</th>
-                                    <th class="p-2.5">Nama AOM</th>
+                                    <th class="p-2.5 text-center w-12">RANK.</th>
+                                    <th class="p-2.5">NAMA AOM</th>
                                     <th class="p-2.5 text-center">NOA</th>
-                                    <th class="p-2.5 text-right">Total Lending</th>
+                                    <th class="p-2.5 text-right">TOTAL LENDING</th>
                                 </tr>
                             </thead>
                             <tbody id="tableRankingAom" class="divide-y divide-slate-100">
@@ -288,11 +287,11 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Start</label>
-                        <input type="date" id="filterDetailStartDate" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input type="date" id="filterDetailStartDate" placeholder="1 AGUSTUS 2026" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Finish</label>
-                        <input type="date" id="filterDetailEndDate" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input type="date" id="filterDetailEndDate" placeholder="13 AGUSTUS 2026" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                 </div>
 
@@ -321,13 +320,13 @@
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-800 text-white font-semibold sticky top-0 z-10">
                             <tr>
-                                <th class="p-3 text-center">No</th>
-                                <th class="p-3">Tanggal MPPU</th>
-                                <th class="p-3">Unit</th>
-                                <th class="p-3 text-center">Kode</th>
+                                <th class="p-3 text-center">NO</th>
+                                <th class="p-3">TANGGAL MPPU</th>
+                                <th class="p-3">UNIT</th>
+                                <th class="p-3 text-center">KODE</th>
                                 <th class="p-3">AOM</th>
-                                <th class="p-3">Nama Nasabah</th>
-                                <th class="p-3 text-right">Plafond</th>
+                                <th class="p-3">NAMA NASABAH</th>
+                                <th class="p-3 text-right">PLAFOND</th>
                             </tr>
                         </thead>
                         <tbody id="tableDetailedData" class="divide-y divide-slate-200 bg-white">
@@ -351,12 +350,14 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 mb-1">Unit Kerja</label>
+                        <!-- Filter Unit Kerja dari Sheet OPERATOR Kolom A -->
                         <select id="nplFilterUnit" onchange="onNplUnitChange()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             <option value="ALL UNIT">ALL UNIT</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Nasabah</label>
+                        <!-- Filter Nama Nasabah dari Sheet OPERATOR Kolom B -->
                         <input type="text" id="nplFilterNama" list="nasabahOperatorOptions" autocomplete="off" oninput="applyFiltersNplTableOnly()" placeholder="Ketik / Pilih Nama Nasabah..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <datalist id="nasabahOperatorOptions"></datalist>
                     </div>
@@ -465,7 +466,7 @@
                 </div>
             </section>
 
-            <!-- TABEL DATA NASABAH NPL -->
+            <!-- TABEL DETAIL DATA NASABAH -->
             <section class="glass-card rounded-2xl p-5 shadow-sm">
                 <div class="flex flex-wrap justify-between items-center gap-3 mb-4 border-b pb-3">
                     <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
@@ -478,23 +479,21 @@
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-800 text-white font-semibold sticky top-0 z-10">
                             <tr>
-                                <th class="p-3 text-center">No</th>
-                                <th class="p-3">Unit</th>
-                                <th class="p-3">No Rekening</th>
-                                <th class="p-3">Nama Nasabah</th>
-                                <th class="p-3 text-center">Aging</th>
-                                <th class="p-3">Realisasi</th>
+                                <th class="p-3 text-center">NO</th>
+                                <th class="p-3">UNIT</th>
+                                <th class="p-3">NAMA NASABAH</th>
+                                <th class="p-3">REALISASI</th>
                                 <th class="p-3 text-center">JKW</th>
                                 <th class="p-3">JT</th>
-                                <th class="p-3 text-right">Plafond</th>
+                                <th class="p-3 text-right">PLAFOND</th>
                                 <th class="p-3 text-right">OS</th>
-                                <th class="p-3 text-right">Angsuran</th>
-                                <th class="p-3 text-right">Sisa DCA</th>
-                                <th class="p-3 text-center">Plan</th>
+                                <th class="p-3 text-right">ANGSURAN</th>
+                                <th class="p-3 text-center">AGING</th>
+                                <th class="p-3 text-center">PLAN</th>
                             </tr>
                         </thead>
                         <tbody id="tableNplBody" class="divide-y divide-slate-200 bg-white">
-                            <tr><td colspan="13" class="text-center py-8 text-slate-400">Loading...</td></tr>
+                            <tr><td colspan="11" class="text-center py-8 text-slate-400">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -510,7 +509,7 @@
 
     <!-- SCRIPT APPLICATION -->
     <script>
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4QQmx7dh_zn-yTbK7bcoGZkb2M05nDHJzKAa6CugNrgFZ8rvMXzdpFWuHAt3J6qYZDw/exec";
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzlNOj0sOd8bRlz3_stn-d_gvTchKRVKKy5IZvj2Di02psLVtPKZ4XPubi1vf17-wCyg/exec";
 
         // Global Mapping Name Shortener
         const NAMA_SHORT_MAP = {
@@ -538,6 +537,7 @@
 
         let globalNplDb = [];
         let globalNplBasedOn = [];
+        let globalNplOperatorUnit = []; 
         let globalNplOperatorNasabah = []; 
         let lendingChartInstance = null;
 
@@ -545,7 +545,6 @@
             return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(amount || 0);
         }
 
-        // FORMAT TANGGAL UTUH DENGAN NAMA BULAN LENGKAP (Digunakan khusus Filter Utama)
         function formatDateIndo(val) {
             if (val === null || val === undefined || val === '') return '-';
             let dateObj = null;
@@ -561,7 +560,7 @@
                 return val;
             }
 
-            const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const months = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
             const day = dateObj.getDate();
             const month = months[dateObj.getMonth()];
             const year = dateObj.getFullYear();
@@ -569,7 +568,6 @@
             return `${day} ${month} ${year}`;
         }
 
-        // FORMAT TANGGAL SINGKAT DENGAN BULAN DISEDERHANAKAN (Digunakan untuk keterangan Kartu & Chart agar tidak terlalu panjang)
         function formatDateIndoShort(val) {
             if (val === null || val === undefined || val === '') return '-';
             let dateObj = null;
@@ -585,7 +583,7 @@
                 return val;
             }
 
-            const monthsShort = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
+            const monthsShort = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGT", "SEP", "OKT", "NOV", "DES"];
             const day = dateObj.getDate();
             const month = monthsShort[dateObj.getMonth()];
             const year = dateObj.getFullYear();
@@ -593,13 +591,6 @@
             return `${day} ${month} ${year}`;
         }
 
-        // FORMAT TEKS PERIODE RENTANG TANGGAL DENGAN BULAN UTUH (Khusus Filter Utama)
-        function formatRangeLabel(dStart, dEnd) {
-            if (!dStart || !dEnd) return "Periode Bulan Lalu";
-            return `${formatDateIndo(dStart)} s/d ${formatDateIndo(dEnd)}`;
-        }
-
-        // FORMAT TEKS PERIODE RENTANG TANGGAL DENGAN BULAN SINGKAT (Untuk Keterangan Kartu & Chart)
         function formatRangeLabelShort(dStart, dEnd) {
             if (!dStart || !dEnd) return "Periode Bulan Lalu";
             return `${formatDateIndoShort(dStart)} s/d ${formatDateIndoShort(dEnd)}`;
@@ -620,8 +611,8 @@
 
         function updateLastRefreshLog() {
             const now = new Date();
-            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const days = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
+            const months = ['JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI', 'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'];
             
             const dayName = days[now.getDay()];
             const dayNum = now.getDate();
@@ -677,22 +668,26 @@
                     
                     populateLendingFilters();
                     
-                    // Render Dashboard Lending (Sekaligus Menghitung Cards & Chart Dynamic)
+                    // Render Dashboard Lending
                     applyDateFilterLending();
 
                     // Load NPL Data
                     globalNplDb = result.nplDatabase || [];
                     globalNplBasedOn = result.nplBasedOn || [];
                     
-                    let rawNasabahOp = result.nasabahList || [];
-                    const nasabahSet = new Set(rawNasabahOp.filter(Boolean));
-                    globalNplDb.forEach(item => {
-                        if (item.nama) nasabahSet.add(item.nama);
-                    });
+                    // POPULASI FILTER OPERATOR (Sheet "OPERATOR": Kolom A = Unit Kerja, Kolom B = Nama Nasabah)
+                    if (result.operatorNpl) {
+                        globalNplOperatorUnit = result.operatorNpl.unitList || [];
+                        globalNplOperatorNasabah = result.operatorNpl.nasabahList || [];
+                    } else {
+                        globalNplOperatorUnit = globalLendingOp.unitList || [];
+                        let rawNasabahOp = result.nasabahList || [];
+                        const nasabahSet = new Set(rawNasabahOp.filter(Boolean));
+                        globalNplDb.forEach(item => { if (item.nama) nasabahSet.add(item.nama); });
+                        globalNplOperatorNasabah = Array.from(nasabahSet).sort();
+                    }
 
-                    globalNplOperatorNasabah = Array.from(nasabahSet).sort();
-
-                    populateNplFilters(globalLendingOp.unitList || []);
+                    populateNplFilters(globalNplOperatorUnit, globalNplOperatorNasabah);
                     renderNplDashboard();
                     applyFiltersNplTableOnly();
 
@@ -748,7 +743,6 @@
                 return true;
             });
 
-            // Update Teks Keterangan Sub-Card untuk Card Total Plafond & Total NOA (Format Singkat)
             if (startVal && endVal) {
                 const dStart = new Date(startVal + "T00:00:00");
                 const dEnd = new Date(endVal + "T23:59:59");
@@ -760,9 +754,7 @@
                 document.getElementById('lblTotalNoaText').textContent = "NOA by MPPU";
             }
 
-            // Update Card Bulan Lalu & Teks Keterangan Card secara Dinamis
             renderDynamicPreviousMonthCards(startVal, endVal);
-
             renderLendingComponents();
         }
 
@@ -775,7 +767,6 @@
                 let dStart = new Date(startVal + "T00:00:00");
                 let dEnd = new Date(endVal + "T23:59:59");
 
-                // Geser 1 bulan ke belakang
                 dStart.setMonth(dStart.getMonth() - 1);
                 dEnd.setMonth(dEnd.getMonth() - 1);
 
@@ -783,7 +774,6 @@
                 prevMaxBound = dEnd.getTime();
                 labelTextShort = formatRangeLabelShort(dStart, dEnd);
             } else {
-                // Default jika filter kosong: Bulan lalu penuh relatif terhadap hari ini
                 const now = new Date();
                 let pMonth = now.getMonth() - 1;
                 let pYear = now.getFullYear();
@@ -810,8 +800,6 @@
 
             document.getElementById('cardLendingBlnLalu').textContent = formatRupiah(totalPlafondPrev);
             document.getElementById('cardNoaBlnLalu').textContent = totalNoaPrev.toLocaleString('id-ID');
-            
-            // Perbarui Teks Keterangan Sub-Card Bulan Lalu dengan Format Singkat
             document.getElementById('lblLendingBlnLaluText').textContent = labelTextShort;
             document.getElementById('lblNoaBlnLaluText').textContent = labelTextShort;
         }
@@ -886,7 +874,6 @@
             const startVal = document.getElementById('startDate').value;
             const endVal = document.getElementById('endDate').value;
 
-            // Dapatkan seluruh AOM aktif dari Master dengan Nama Singkat
             const masterAomList = (globalLendingOp.aomList || []).map(a => getShortName(a));
 
             let currData = currentLendingDateFiltered;
@@ -912,7 +899,6 @@
                     return ts && ts >= pMin && ts <= pMax;
                 });
 
-                // Perbarui Teks Legenda Grafik Secara Dinamis (Format Singkat)
                 labelCurr = `${formatRangeLabelShort(dCurrStart, dCurrEnd)}`;
                 labelPrev = `${formatRangeLabelShort(dPrevStart, dPrevEnd)}`;
             } else {
@@ -972,7 +958,7 @@
                         {
                             label: labelCurr,
                             data: currDatasetData,
-                            backgroundColor: '#002855', // Tone Biru Header
+                            backgroundColor: '#002855',
                             borderColor: '#001c3d',
                             borderWidth: 1,
                             borderRadius: 6
@@ -980,7 +966,7 @@
                         {
                             label: labelPrev,
                             data: prevDatasetData,
-                            backgroundColor: '#76bc21', // Tone Hijau Header
+                            backgroundColor: '#76bc21',
                             borderColor: '#5a9019',
                             borderWidth: 1,
                             borderRadius: 6
@@ -1169,21 +1155,25 @@
         // ==========================================
         // NPL FUNCTIONS
         // ==========================================
-        function populateNplFilters(unitList) {
+        function populateNplFilters(unitList, nasabahList) {
             const selectUnit = document.getElementById('nplFilterUnit');
             const dataListNasabah = document.getElementById('nasabahOperatorOptions');
 
             selectUnit.innerHTML = '<option value="ALL UNIT">ALL UNIT</option>';
             dataListNasabah.innerHTML = '';
 
-            unitList.forEach(u => {
-                const opt = document.createElement('option');
-                opt.value = u;
-                opt.textContent = u;
-                selectUnit.appendChild(opt);
+            // Filter Dropdown Unit Kerja dari Sheet "OPERATOR" Kolom A
+            (unitList || []).forEach(u => {
+                if (u) {
+                    const opt = document.createElement('option');
+                    opt.value = u;
+                    opt.textContent = u;
+                    selectUnit.appendChild(opt);
+                }
             });
 
-            globalNplOperatorNasabah.forEach(nama => {
+            // Filter List Nama Nasabah dari Sheet "OPERATOR" Kolom B
+            (nasabahList || []).forEach(nama => {
                 if (nama) {
                     const opt = document.createElement('option');
                     opt.value = nama;
@@ -1200,27 +1190,32 @@
         function renderNplDashboard() {
             const unitFilter = document.getElementById('nplFilterUnit').value;
 
+            // Sheet DATABASE (Sisa Beban)
             const filteredDb = globalNplDb.filter(item => {
                 return (unitFilter === 'ALL UNIT' || item.unit === unitFilter);
             });
 
+            // Sheet BASEDON (Total Beban)
             const filteredTarget = globalNplBasedOn.filter(item => {
                 return (unitFilter === 'ALL UNIT' || item.unit === unitFilter);
             });
 
+            // CARD TOTAL BEBAN (Sheet BASEDON)
             const totalNoa = filteredTarget.length;
-            const totalOs = filteredTarget.reduce((s, i) => s + i.os, 0);
+            const totalOs = filteredTarget.reduce((s, i) => s + (parseFloat(i.os) || 0), 0);
 
+            // CARD SISA BEBAN (Sheet DATABASE)
             const sisaNoa = filteredDb.length;
-            const sisaOs = filteredDb.reduce((s, i) => s + i.os, 0);
+            const sisaOs = filteredDb.reduce((s, i) => s + (parseFloat(i.os) || 0), 0);
 
+            // SCR = (OS TOTAL BEBAN - OS SISA BEBAN) / OS TOTAL BEBAN
             let successRate = totalOs > 0 ? ((totalOs - sisaOs) / totalOs) * 100 : 0;
 
-            document.getElementById('nplSisaNoa').textContent = sisaNoa;
+            document.getElementById('nplSisaNoa').textContent = sisaNoa.toLocaleString('id-ID');
             document.getElementById('nplSisaOs').textContent = formatRupiah(sisaOs);
             document.getElementById('nplSuccessRate').textContent = successRate.toFixed(2) + " %";
 
-            document.getElementById('nplTotalNoa').textContent = totalNoa;
+            document.getElementById('nplTotalNoa').textContent = totalNoa.toLocaleString('id-ID');
             document.getElementById('nplTotalOs').textContent = formatRupiah(totalOs);
 
             updateNplCategory("col", "COLL", filteredDb, filteredTarget);
@@ -1242,7 +1237,7 @@
             tbody.innerHTML = '';
 
             if (filteredDbTable.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="13" class="text-center py-8 text-slate-400 text-xs">Data nasabah tidak ditemukan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" class="text-center py-8 text-slate-400 text-xs">Data nasabah tidak ditemukan.</td></tr>`;
                 document.getElementById('nplRecordCount').textContent = `0 Data Terfilter`;
                 return;
             }
@@ -1258,16 +1253,14 @@
                 tr.innerHTML = `
                     <td class="p-3 text-center text-slate-400">${index + 1}</td>
                     <td class="p-3 font-semibold text-slate-800">${item.unit || '-'}</td>
-                    <td class="p-3 font-mono text-slate-500">${item.norek || '-'}</td>
                     <td class="p-3 font-bold text-slate-900">${item.nama || '-'}</td>
-                    <td class="p-3 text-center">${item.aging || '-'}</td>
                     <td class="p-3 whitespace-nowrap">${formatDateIndoShort(item.realisasi)}</td>
                     <td class="p-3 text-center">${item.jkw || '-'}</td>
                     <td class="p-3 whitespace-nowrap">${formatDateIndoShort(item.jt)}</td>
                     <td class="p-3 text-right font-medium">${formatRupiah(item.plafond)}</td>
                     <td class="p-3 text-right font-bold text-slate-900">${formatRupiah(item.os)}</td>
                     <td class="p-3 text-right">${formatRupiah(item.angsuran)}</td>
-                    <td class="p-3 text-right">${formatRupiah(item.sisa_dca)}</td>
+                    <td class="p-3 text-center">${item.aging || '-'}</td>
                     <td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold text-[10px] ${badgeClass}">${item.plan || '-'}</span></td>
                 `;
                 tbody.appendChild(tr);
@@ -1281,15 +1274,15 @@
             const targetList = targetDb.filter(i => i.plan && i.plan.includes(planKey));
 
             const totalNoa = targetList.length;
-            const totalOs = targetList.reduce((s, i) => s + i.os, 0);
+            const totalOs = targetList.reduce((s, i) => s + (parseFloat(i.os) || 0), 0);
             const sisaNoa = activeList.length;
-            const sisaOs = activeList.reduce((s, i) => s + i.os, 0);
+            const sisaOs = activeList.reduce((s, i) => s + (parseFloat(i.os) || 0), 0);
 
             let rate = totalOs > 0 ? ((totalOs - sisaOs) / totalOs) * 100 : 0;
 
-            document.getElementById(prefix + 'TotalNoa').textContent = totalNoa;
+            document.getElementById(prefix + 'TotalNoa').textContent = totalNoa.toLocaleString('id-ID');
             document.getElementById(prefix + 'TotalOs').textContent = formatRupiah(totalOs);
-            document.getElementById(prefix + 'SisaNoa').textContent = sisaNoa;
+            document.getElementById(prefix + 'SisaNoa').textContent = sisaNoa.toLocaleString('id-ID');
             document.getElementById(prefix + 'SisaOs').textContent = formatRupiah(sisaOs);
             document.getElementById(prefix + 'SuccessRate').textContent = rate.toFixed(2) + " %";
         }
