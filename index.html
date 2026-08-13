@@ -225,16 +225,23 @@
                 </div>
             </section>
 
-            <!-- GRAFIK LENDING AKUMULASI SETIAP AOM VS BULAN LALU -->
+            <!-- GRAFIK LENDING AKUMULASI SETIAP AOM VS BULAN LALU (PENYEMPURNAAN SLIDE BAR / SCROLLBAR) -->
             <section class="glass-card rounded-2xl p-5 shadow-sm">
                 <div class="flex items-center justify-between mb-4 border-b pb-3">
                     <div class="flex items-center gap-2">
                         <span class="p-2 rounded-lg bg-blue-100 text-blue-700"><i class="fa-solid fa-chart-line"></i></span>
                         <h3 class="font-bold text-slate-800 text-sm uppercase">PERBANDINGAN LENDING AOM</h3>
                     </div>
+                    <!-- Indicator Bantuan untuk Mode Mobile -->
+                    <span class="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md sm:hidden flex items-center gap-1 border border-blue-200">
+                        <i class="fa-solid fa-arrows-left-right"></i> Geser Grafik
+                    </span>
                 </div>
-                <div class="relative w-full h-80">
-                    <canvas id="chartLendingAom"></canvas>
+                <!-- Container dengan custom scrollbar horizontal untuk dukungan tampilan mobile -->
+                <div class="w-full overflow-x-auto custom-scrollbar pb-2">
+                    <div class="relative min-w-[600px] md:min-w-full h-80">
+                        <canvas id="chartLendingAom"></canvas>
+                    </div>
                 </div>
             </section>
 
@@ -556,7 +563,7 @@
 
     <!-- FOOTER -->
     <footer class="bg-slate-950 text-slate-400 text-xs py-4 text-center mt-auto border-t border-slate-800">
-        <p>&copy; Handled by Wahyu Hidayat & Abdullah M | Dashboard Monitoring Lending (MPPU) & Potensi NPL</p>
+        <p>&copy; Handled by Wahyu Hidayat & Abdullah M[cite: 1] | Dashboard Monitoring Lending (MPPU) & Potensi NPL</p>
     </footer>
 
     <!-- SCRIPT APPLICATION -->
