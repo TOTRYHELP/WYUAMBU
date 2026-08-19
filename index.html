@@ -90,59 +90,51 @@
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-   <!-- TOP HEADER NAVBAR (Compact Mobile Version) -->
-<header class="bg-[#002855] text-white shadow-xl sticky top-0 z-50 border-b-2 sm:border-b-4 border-[#76bc21]">
-    <!-- Kurangi padding vertikal (py-2 di mobile, py-3 di desktop) -->
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-3 flex justify-between items-center gap-2 sm:gap-4">
-        
-        <!-- Logo & Branding Section -->
-        <div class="flex items-center space-x-2.5 sm:space-x-3.5">
-            <!-- Ukuran Icon Box disesuaikan (w-8 h-8 di mobile, w-10 h-10 di desktop) -->
-            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-lg sm:rounded-xl shadow-md flex items-center justify-center text-[#002855] shrink-0">
-                <i class="fa-solid fa-building-columns text-lg sm:text-xl"></i>
-            </div>
-            <div>
-                <div class="flex items-center gap-1.5 sm:gap-2">
-                    <span class="text-[10px] sm:text-xs font-black px-1.5 py-0.2 bg-[#76bc21] text-white rounded tracking-wide shadow-xs">PNM</span>
-                    <h1 class="text-sm sm:text-lg font-extrabold tracking-tight text-white uppercase leading-tight">WAHYU HIDAYAT</h1>
+    <!-- TOP HEADER NAVBAR -->
+    <header class="bg-[#002855] text-white shadow-xl sticky top-0 z-50 border-b-4 border-[#76bc21]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3.5">
+                <div class="w-11 h-11 bg-white rounded-xl shadow-md flex items-center justify-center text-[#002855]">
+                    <i class="fa-solid fa-building-columns text-2xl"></i>
                 </div>
-                <!-- Sembunyikan sub-deskripsi di mobile untuk menghemat ruang -->
-                <p class="hidden sm:flex text-xs text-slate-300 font-medium items-center gap-1.5 mt-0.5">
-                    <span class="inline-block w-2 h-2 rounded-full bg-[#76bc21]"></span>
-                    Dashboard Monitoring Lending & Potensi NPL
-                </p>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black px-2 py-0.5 bg-[#76bc21] text-white rounded tracking-wide shadow-xs">PNM</span>
+                        <h1 class="text-xl font-extrabold tracking-tight text-white uppercase">WAHYU HIDAYAT</h1>
+                    </div>
+                    <p class="text-xs text-slate-300 font-medium flex items-center gap-1.5 mt-0.5">
+                        <span class="inline-block w-2 h-2 rounded-full bg-[#76bc21]"></span>
+                        Dashboard Monitoring Lending & Potensi NPL
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <p class="text-[10px] uppercase font-extrabold text-slate-300 tracking-wider">Tanggal</p>
+                    <p id="lastRefreshLog" class="text-xs font-bold text-white">-</p>
+                </div>
+
+                <button onclick="fetchAllData()" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-lg border border-white/20 transition active:scale-95 shadow-sm">
+                    <i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i>
+                    <span>RELOAD DATA</span>
+                </button>
             </div>
         </div>
-        
-        <!-- Action Button Section -->
-        <div class="flex items-center gap-2 sm:gap-4">
-            <div class="text-right hidden sm:block">
-                <p class="text-[10px] uppercase font-extrabold text-slate-300 tracking-wider">Tanggal</p>
-                <p id="lastRefreshLog" class="text-xs font-bold text-white">-</p>
-            </div>
 
-            <!-- Tombol reload dibuat lebih ramping di mobile -->
-            <button onclick="fetchAllData()" class="inline-flex items-center gap-1.5 sm:gap-2 bg-white/10 hover:bg-white/20 text-white text-[11px] sm:text-xs font-bold px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20 transition active:scale-95 shadow-sm">
-                <i id="refreshIcon" class="fa-solid fa-arrows-rotate text-xs"></i>
-                <span class="hidden sm:inline">RELOAD DATA</span>
-                <span class="sm:hidden">RELOAD</span>
+        <!-- SPA NAVIGATION TABS -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-1 pb-3 flex gap-3 overflow-x-auto border-t border-white/10 mt-1">
+            <button id="tabBtnLending" onclick="switchTab('lending')" class="tab-active px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition shadow-sm whitespace-nowrap">
+                <i class="fa-solid fa-money-bill-trend-up"></i>
+                <span>LENDING by MPPU</span>
+            </button>
+            <button id="tabBtnNpl" onclick="switchTab('npl')" class="tab-inactive px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition shadow-sm whitespace-nowrap">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>POTENSI NPL</span>
             </button>
         </div>
-    </div>
+    </header>
 
-    <!-- SPA NAVIGATION TABS -->
-    <!-- Hilangkan scrollbar default & kurangi margin/padding vertikal -->
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-0.5 pb-2 flex gap-2 overflow-x-auto border-t border-white/10 mt-0.5 scrollbar-none">
-        <button id="tabBtnLending" onclick="switchTab('lending')" class="tab-active px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-bold text-[11px] sm:text-xs flex items-center gap-1.5 sm:gap-2 border transition shadow-sm whitespace-nowrap">
-            <i class="fa-solid fa-money-bill-trend-up"></i>
-            <span>LENDING by MPPU</span>
-        </button>
-        <button id="tabBtnNpl" onclick="switchTab('npl')" class="tab-inactive px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-bold text-[11px] sm:text-xs flex items-center gap-1.5 sm:gap-2 border transition shadow-sm whitespace-nowrap">
-            <i class="fa-solid fa-shield-halved"></i>
-            <span>POTENSI NPL</span>
-        </button>
-    </div>
-</header>
     <!-- MAIN CONTAINER -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full space-y-6">
 
