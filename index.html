@@ -92,30 +92,30 @@
 
     <!-- TOP HEADER NAVBAR -->
     <header class="bg-[#002855] text-white shadow-xl sticky top-0 z-50 border-b-4 border-[#76bc21]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
-            <div class="flex items-center space-x-3.5">
-                <div class="w-11 h-11 bg-white rounded-xl shadow-md flex items-center justify-center text-[#002855]">
-                    <i class="fa-solid fa-building-columns text-2xl"></i>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3.5 flex flex-wrap justify-between items-center gap-2 sm:gap-4">
+            <div class="flex items-center space-x-2.5 sm:space-x-3.5">
+                <div class="w-8 h-8 sm:w-11 sm:h-11 bg-white rounded-lg sm:rounded-xl shadow-md flex items-center justify-center text-[#002855] shrink-0">
+                    <i class="fa-solid fa-building-columns text-base sm:text-2xl"></i>
                 </div>
                 <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-black px-2 py-0.5 bg-[#76bc21] text-white rounded tracking-wide shadow-xs">PNM</span>
-                        <h1 class="text-xl font-extrabold tracking-tight text-white uppercase">WAHYU HIDAYAT</h1>
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                        <span class="text-[10px] sm:text-xs font-black px-1.5 py-0.5 sm:px-2 bg-[#76bc21] text-white rounded tracking-wide shadow-xs">PNM</span>
+                        <h1 class="text-base sm:text-xl font-extrabold tracking-tight text-white uppercase leading-tight">WAHYU HIDAYAT</h1>
                     </div>
-                    <p class="text-xs text-slate-300 font-medium flex items-center gap-1.5 mt-0.5">
-                        <span class="inline-block w-2 h-2 rounded-full bg-[#76bc21]"></span>
+                    <p class="text-[10px] sm:text-xs text-slate-300 font-medium flex items-center gap-1 sm:gap-1.5 mt-0.5">
+                        <span class="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#76bc21]"></span>
                         Dashboard Monitoring Lending & Potensi NPL
                     </p>
                 </div>
             </div>
             
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 sm:gap-4 ml-auto sm:ml-0">
                 <div class="text-right hidden sm:block">
                     <p class="text-[10px] uppercase font-extrabold text-slate-300 tracking-wider">Tanggal</p>
                     <p id="lastRefreshLog" class="text-xs font-bold text-white">-</p>
                 </div>
 
-                <button onclick="fetchAllData()" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-lg border border-white/20 transition active:scale-95 shadow-sm">
+                <button onclick="fetchAllData()" class="inline-flex items-center gap-1.5 sm:gap-2 bg-white/10 hover:bg-white/20 text-white text-[11px] sm:text-xs font-bold px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-lg border border-white/20 transition active:scale-95 shadow-sm">
                     <i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i>
                     <span>RELOAD DATA</span>
                 </button>
@@ -123,12 +123,12 @@
         </div>
 
         <!-- SPA NAVIGATION TABS -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-1 pb-3 flex gap-3 overflow-x-auto border-t border-white/10 mt-1">
-            <button id="tabBtnLending" onclick="switchTab('lending')" class="tab-active px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition shadow-sm whitespace-nowrap">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0.5 sm:pt-1 pb-2 sm:pb-3 flex gap-2 sm:gap-3 overflow-x-auto border-t border-white/10 mt-0.5 sm:mt-1">
+            <button id="tabBtnLending" onclick="switchTab('lending')" class="tab-active px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl font-bold text-[11px] sm:text-xs flex items-center gap-1.5 sm:gap-2 border transition shadow-sm whitespace-nowrap">
                 <i class="fa-solid fa-money-bill-trend-up"></i>
                 <span>LENDING by MPPU</span>
             </button>
-            <button id="tabBtnNpl" onclick="switchTab('npl')" class="tab-inactive px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition shadow-sm whitespace-nowrap">
+            <button id="tabBtnNpl" onclick="switchTab('npl')" class="tab-inactive px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl font-bold text-[11px] sm:text-xs flex items-center gap-1.5 sm:gap-2 border transition shadow-sm whitespace-nowrap">
                 <i class="fa-solid fa-shield-halved"></i>
                 <span>POTENSI NPL</span>
             </button>
@@ -691,13 +691,13 @@
             const viewNpl = document.getElementById('viewNpl');
 
             if (tabName === 'lending') {
-                btnLending.className = "tab-active px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition shadow-sm whitespace-nowrap";
-                btnNpl.className = "tab-inactive px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition shadow-sm whitespace-nowrap";
+                btnLending.className = "tab-active px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl font-bold text-[11px] sm:text-xs flex items-center gap-1.5 sm:gap-2 border transition shadow-sm whitespace-nowrap";
+                btnNpl.className = "tab-inactive px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl font-bold text-[11px] sm:text-xs flex items-center gap-1.5 sm:gap-2 border transition shadow-sm whitespace-nowrap";
                 viewLending.classList.remove('hidden');
                 viewNpl.classList.add('hidden');
             } else {
-                btnNpl.className = "tab-active px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition shadow-sm whitespace-nowrap";
-                btnLending.className = "tab-inactive px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition shadow-sm whitespace-nowrap";
+                btnNpl.className = "tab-active px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl font-bold text-[11px] sm:text-xs flex items-center gap-1.5 sm:gap-2 border transition shadow-sm whitespace-nowrap";
+                btnLending.className = "tab-inactive px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl font-bold text-[11px] sm:text-xs flex items-center gap-1.5 sm:gap-2 border transition shadow-sm whitespace-nowrap";
                 viewNpl.classList.remove('hidden');
                 viewLending.classList.add('hidden');
             }
@@ -1304,7 +1304,7 @@
             filteredDbTable.forEach((item, index) => {
                 let badgeClass = "bg-slate-100 text-slate-700";
                 if (item.plan && item.plan.includes('COLL')) badgeClass = "bg-emerald-100 text-emerald-800 border border-emerald-300";
-                else if (item.plan && item.plan.includes('3R')) badgeClass = "bg-amber-100 text-amber-800 border border-amber-300";
+                else if (item.plan && item.plan.includes('3R')) badgeClass = "bg-[#76bc21]/20 text-[#002855] border border-[#76bc21]/50";
                 else if (item.plan && (item.plan.includes('FLOW') || item.plan.includes('NPL'))) badgeClass = "bg-rose-100 text-rose-800 border border-rose-300";
 
                 const tr = document.createElement('tr');
