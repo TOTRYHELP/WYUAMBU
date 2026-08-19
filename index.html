@@ -35,10 +35,6 @@
         .tab-inactive { background-color: #ffffff; color: #64748b; border-color: #e2e8f0; }
         .tab-inactive:hover { background-color: #f1f5f9; color: #1e293b; }
 
-        /* ========================================== */
-        /* UI ENHANCEMENT FOR DROPDOWN & CALENDAR     */
-        /* ========================================== */
-        
         /* Modern Styled Select Dropdown */
         select {
             appearance: none;
@@ -225,7 +221,7 @@
                 </div>
             </section>
 
-            <!-- GRAFIK LENDING AKUMULASI SETIAP AOM VS BULAN LALU (PENYEMPURNAAN SLIDE BAR / SCROLLBAR) -->
+            <!-- GRAFIK LENDING AKUMULASI SETIAP AOM VS BULAN LALU -->
             <section class="glass-card rounded-2xl p-5 shadow-sm">
                 <div class="flex items-center justify-between mb-4 border-b pb-3">
                     <div class="flex items-center gap-2">
@@ -409,14 +405,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 mb-1">Unit Kerja</label>
-                        <!-- Filter Unit Kerja dari Sheet OPERATOR Kolom A -->
                         <select id="nplFilterUnit" onchange="onNplUnitChange()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             <option value="ALL UNIT">ALL UNIT</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Nasabah</label>
-                        <!-- Filter Nama Nasabah dari Sheet OPERATOR Kolom B -->
                         <input type="text" id="nplFilterNama" list="nasabahOperatorOptions" autocomplete="off" oninput="applyFiltersNplTableOnly()" placeholder="Ketik / Pilih Nama Nasabah..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <datalist id="nasabahOperatorOptions"></datalist>
                     </div>
@@ -734,7 +728,6 @@
                     globalNplDb = result.nplDatabase || [];
                     globalNplBasedOn = result.nplBasedOn || [];
                     
-                    // POPULASI FILTER OPERATOR (Sheet "OPERATOR": Kolom A = Unit Kerja, Kolom B = Nama Nasabah)
                     if (result.operatorNpl) {
                         globalNplOperatorUnit = result.operatorNpl.unitList || [];
                         globalNplOperatorNasabah = result.operatorNpl.nasabahList || [];
@@ -928,6 +921,9 @@
             renderLendingDetailedTable();
         }
 
+        // ==========================================
+        // PENYEMPURNAAN: URUTAN GRAFIK BERDASARKAN LENDING TERTINGGI (FILTER UTAMA)
+        // ==========================================
         function renderLendingComparisonChart() {
             const ctx = document.getElementById('chartLendingAom').getContext('2d');
             const startVal = document.getElementById('startDate').value;
@@ -1001,7 +997,12 @@
                 }
             });
 
-            const labels = masterAomList;
+            // URUTKAN AOM BERDASARKAN TOTAL LENDING TERTINGGI DARI FILTER UTAMA
+            const sortedAomList = [...masterAomList].sort((a, b) => {
+                return (currAomTotals[b] || 0) - (currAomTotals[a] || 0);
+            });
+
+            const labels = sortedAomList;
             const currDatasetData = labels.map(aom => (currAomTotals[aom] / 1000000).toFixed(2));
             const prevDatasetData = labels.map(aom => (prevAomTotals[aom] / 1000000).toFixed(2));
 
@@ -1221,7 +1222,6 @@
             selectUnit.innerHTML = '<option value="ALL UNIT">ALL UNIT</option>';
             dataListNasabah.innerHTML = '';
 
-            // Filter Dropdown Unit Kerja dari Sheet "OPERATOR" Kolom A
             (unitList || []).forEach(u => {
                 if (u) {
                     const opt = document.createElement('option');
@@ -1231,7 +1231,6 @@
                 }
             });
 
-            // Filter List Nama Nasabah dari Sheet "OPERATOR" Kolom B
             (nasabahList || []).forEach(nama => {
                 if (nama) {
                     const opt = document.createElement('option');
@@ -1249,25 +1248,20 @@
         function renderNplDashboard() {
             const unitFilter = document.getElementById('nplFilterUnit').value;
 
-            // Sheet DATABASE (Sisa Beban)
             const filteredDb = globalNplDb.filter(item => {
                 return (unitFilter === 'ALL UNIT' || item.unit === unitFilter);
             });
 
-            // Sheet BASEDON (Total Beban)
             const filteredTarget = globalNplBasedOn.filter(item => {
                 return (unitFilter === 'ALL UNIT' || item.unit === unitFilter);
             });
 
-            // CARD TOTAL BEBAN (Sheet BASEDON)
             const totalNoa = filteredTarget.length;
             const totalOs = filteredTarget.reduce((s, i) => s + (parseFloat(i.os) || 0), 0);
 
-            // CARD SISA BEBAN (Sheet DATABASE)
             const sisaNoa = filteredDb.length;
             const sisaOs = filteredDb.reduce((s, i) => s + (parseFloat(i.os) || 0), 0);
 
-            // SCR = (OS TOTAL BEBAN - OS SISA BEBAN) / OS TOTAL BEBAN
             let successRate = totalOs > 0 ? ((totalOs - sisaOs) / totalOs) * 100 : 0;
 
             document.getElementById('nplSisaNoa').textContent = sisaNoa.toLocaleString('id-ID');
