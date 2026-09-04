@@ -423,6 +423,32 @@
                 </div>
             </section>
 
+            <!-- KLASEMEN PENYELESAIAN POTENSI NPL BY UNIT (DITARUH TEPAT DIBAWAH FILTER & BEBAS DARI PENGARUH FILTER) -->
+            <section class="glass-card rounded-2xl p-5 shadow-sm">
+                <div class="flex justify-between items-center mb-4 border-b pb-3">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-amber-500"></i> Klasemen Penyelesaian Potensi NPL by Unit
+                    </h3>
+                    <span class="text-xs text-slate-400 font-semibold" id="nplUnitCount">0 Unit</span>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar max-h-[460px] rounded-lg border border-slate-200">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-800 text-white font-semibold sticky top-0 z-10">
+                            <tr>
+                                <th class="p-3 text-center w-12">RANK</th>
+                                <th class="p-3">UNIT KERJA</th>
+                                <th class="p-3 text-center" title="Total Beban OS / NOA">TOTAL BEBAN (OS / NOA)</th>
+                                <th class="p-3 text-center" title="Sisa Beban OS / NOA">SISA BEBAN (OS / NOA)</th>
+                                <th class="p-3 text-right">SUCCESS RATE (SCR)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableKlasemenNplUnit" class="divide-y divide-slate-100 bg-white">
+                            <tr><td colspan="5" class="text-center py-6 text-slate-400">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <!-- PROGRES BAR PER MINGGU (NPL) -->
             <section class="glass-card rounded-2xl p-5 shadow-sm border-t-4 border-t-blue-600">
                 <div class="flex flex-wrap items-center justify-between mb-4 border-b pb-3 gap-2">
@@ -939,9 +965,6 @@
             renderLendingDetailedTable();
         }
 
-        // ==========================================
-        // URUTAN GRAFIK BERDASARKAN LENDING TERTINGGI (FILTER UTAMA)
-        // ==========================================
         function renderLendingComparisonChart() {
             const ctx = document.getElementById('chartLendingAom').getContext('2d');
             const startVal = document.getElementById('startDate').value;
@@ -1015,7 +1038,6 @@
                 }
             });
 
-            // URUTKAN AOM BERDASARKAN TOTAL LENDING TERTINGGI DARI FILTER UTAMA
             const sortedAomList = [...masterAomList].sort((a, b) => {
                 return (currAomTotals[b] || 0) - (currAomTotals[a] || 0);
             });
@@ -1070,7 +1092,7 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return ` ${context.dataset.label}: Rp ${context.raw} Juta`;
+                                    return ` ${context.dataset.label}: ${context.raw} Juta`;
                                 }
                             }
                         }
@@ -1092,7 +1114,7 @@
                             },
                             title: {
                                 display: true,
-                                text: 'Akumulasi Lending (Juta Rp)',
+                                text: 'Akumulasi Lending (Juta)',
                                 font: { size: 11, weight: 'bold' }
                             }
                         }
@@ -1295,6 +1317,111 @@
 
             // RENDER PROGRESS BAR MINGGUAN DENGAN CUT-OFF HARI MINGGU
             renderNplWeeklyProgress(unitFilter);
+
+            // RENDER KLASEMEN PENYELESAIAN NPL BY UNIT (SELALU INDEPENDEN / ALL UNITS)
+            renderNplUnitKlasemen();
+        }
+
+        // ==========================================
+        // KLASEMEN PENYELESAIAN NPL BY UNIT (INDEPENDEN DARIPADA FILTER UNIT & NASABAH)
+        // ==========================================
+        function renderNplUnitKlasemen() {
+            const tbody = document.getElementById('tableKlasemenNplUnit');
+            const unitCountEl = document.getElementById('nplUnitCount');
+            if (!tbody) return;
+
+            // Selalu ambil seluruh daftar unit tanpa terpengaruh dropdown filter unit
+            let masterUnits = globalNplOperatorUnit && globalNplOperatorUnit.length > 0 
+                ? globalNplOperatorUnit 
+                : Array.from(new Set([...globalNplBasedOn.map(i => i.unit), ...globalNplDb.map(i => i.unit)])).filter(Boolean).sort();
+
+            const unitMap = {};
+            masterUnits.forEach(u => {
+                unitMap[u] = {
+                    unit: u,
+                    totalNoa: 0,
+                    totalOs: 0,
+                    sisaNoa: 0,
+                    sisaOs: 0,
+                    scr: 0
+                };
+            });
+
+            // Hitung Total Beban Seluruh Unit dari NPL BasedOn
+            globalNplBasedOn.forEach(item => {
+                const u = item.unit;
+                if (unitMap[u]) {
+                    unitMap[u].totalNoa += 1;
+                    unitMap[u].totalOs += (parseFloat(item.os) || 0);
+                }
+            });
+
+            // Hitung Sisa Beban Seluruh Unit dari NPL Database
+            globalNplDb.forEach(item => {
+                const u = item.unit;
+                if (unitMap[u]) {
+                    unitMap[u].sisaNoa += 1;
+                    unitMap[u].sisaOs += (parseFloat(item.os) || 0);
+                }
+            });
+
+            // Hitung Success Rate (SCR)
+            Object.values(unitMap).forEach(uData => {
+                if (uData.totalOs > 0) {
+                    uData.scr = ((uData.totalOs - uData.sisaOs) / uData.totalOs) * 100;
+                } else {
+                    uData.scr = 0;
+                }
+            });
+
+            // Urutkan berdasarkan Success Rate tertinggi
+            const sortedNplUnits = Object.values(unitMap).sort((a, b) => b.scr - a.scr || a.sisaOs - b.sisaOs);
+
+            if (unitCountEl) unitCountEl.textContent = `${sortedNplUnits.length} Unit`;
+
+            tbody.innerHTML = '';
+            if (sortedNplUnits.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400">Data klasemen NPL unit tidak ditemukan.</td></tr>`;
+                return;
+            }
+
+            sortedNplUnits.forEach((item, index) => {
+                const rankNum = index + 1;
+                let badgeStyle = "bg-slate-100 text-slate-600 border-slate-200";
+                let rowBg = "hover:bg-slate-50";
+
+                if (rankNum === 1) {
+                    badgeStyle = "bg-amber-500 text-white font-black shadow-sm border-amber-600";
+                    rowBg = "bg-amber-50/30 hover:bg-amber-50/60";
+                } else if (rankNum === 2) {
+                    badgeStyle = "bg-slate-400 text-white font-bold border-slate-500";
+                    rowBg = "bg-slate-50/50 hover:bg-slate-100/60";
+                } else if (rankNum === 3) {
+                    badgeStyle = "bg-amber-800 text-white font-bold border-amber-900";
+                    rowBg = "bg-amber-950/5 hover:bg-amber-950/10";
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = `${rowBg} transition border-b border-slate-100 text-xs`;
+                tr.innerHTML = `
+                    <td class="p-3 text-center">
+                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md text-[10px] border ${badgeStyle}">${rankNum}</span>
+                    </td>
+                    <td class="p-3 font-bold text-slate-800">${item.unit}</td>
+                    <td class="p-3 text-center">
+                        <div class="text-sm font-black text-slate-900">${formatRupiah(item.totalOs)}</div>
+                        <div class="text-[10px] font-medium text-slate-400">${item.totalNoa} NOA</div>
+                    </td>
+                    <td class="p-3 text-center">
+                        <div class="text-sm font-black text-rose-600">${formatRupiah(item.sisaOs)}</div>
+                        <div class="text-[10px] font-medium text-slate-400">${item.sisaNoa} NOA</div>
+                    </td>
+                    <td class="p-3 text-right">
+                        <span class="text-sm font-black ${item.scr >= 50 ? 'text-emerald-600' : 'text-blue-600'}">${item.scr.toFixed(2)} %</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
         // ==========================================
@@ -1424,11 +1551,11 @@
                         </div>
                         <div class="flex justify-between items-end mb-1">
                             <div>
-                                <span class="text-[10px] text-slate-400 font-bold uppercase">Target: ${targetPct}%</span>
-                                <p class="text-xs font-bold text-slate-700">Rp ${formatRupiah(targetNominalWeek)}</p>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase">TARGET: ${targetPct}%</span>
+                                <p class="text-xs font-bold text-slate-700">${formatRupiah(targetNominalWeek)}</p>
                             </div>
                             <div class="text-right">
-                                <span class="text-[10px] font-extrabold text-blue-900">${accumulativeTargetPct}% (Kum)</span>
+                                <span class="text-[10px] font-extrabold text-blue-900">${targetPct}% (Kum)</span>
                             </div>
                         </div>
                         <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200/60 mt-2">
