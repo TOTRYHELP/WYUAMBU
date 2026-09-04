@@ -423,6 +423,24 @@
                 </div>
             </section>
 
+            <!-- PROGRES BAR PER MINGGU (NPL) -->
+            <section class="glass-card rounded-2xl p-5 shadow-sm border-t-4 border-t-blue-600">
+                <div class="flex flex-wrap items-center justify-between mb-4 border-b pb-3 gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="p-2 rounded-lg bg-blue-100 text-blue-700"><i class="fa-solid fa-chart-line"></i></span>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm uppercase">PROGRES BEBAN PER MINGGU (PENYELESAIAN POTENSI NPL)</h3>
+                            <p class="text-[11px] text-slate-500 font-medium">Cut-off per minggu dihitung setiap bertemu Hari Minggu pada bulan berjalan</p>
+                        </div>
+                    </div>
+                    <span id="nplWeeklyCurrentMonth" class="text-xs font-black px-3 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-200">BULAN BERJALAN</span>
+                </div>
+
+                <div id="nplWeeklyProgressBarContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Dynamic Bars Generated via JavaScript -->
+                </div>
+            </section>
+
             <!-- KPI SUMMARY CARDS NPL -->
             <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- SISA BEBAN (Sheet DATABASE) -->
@@ -922,7 +940,7 @@
         }
 
         // ==========================================
-        // PENYEMPURNAAN: URUTAN GRAFIK BERDASARKAN LENDING TERTINGGI (FILTER UTAMA)
+        // URUTAN GRAFIK BERDASARKAN LENDING TERTINGGI (FILTER UTAMA)
         // ==========================================
         function renderLendingComparisonChart() {
             const ctx = document.getElementById('chartLendingAom').getContext('2d');
@@ -1274,6 +1292,153 @@
             updateNplCategory("col", "COLL", filteredDb, filteredTarget);
             updateNplCategory("res", "3R", filteredDb, filteredTarget);
             updateNplCategory("flow", "FLOW", filteredDb, filteredTarget);
+
+            // RENDER PROGRESS BAR MINGGUAN DENGAN CUT-OFF HARI MINGGU
+            renderNplWeeklyProgress(unitFilter);
+        }
+
+        // ==========================================
+        // LOGIKA BARU: HITUNG PROGRES MINGGUAN PER MINGGU (CUT OFF HARI MINGGU)
+        // ==========================================
+        function getWeeklyCutoffRanges(year, monthIndex) {
+            const weeks = [];
+            const lastDayObj = new Date(year, monthIndex + 1, 0);
+            const totalDaysInMonth = lastDayObj.getDate();
+
+            let currentStart = 1;
+            let weekNumber = 1;
+
+            for (let day = 1; day <= totalDaysInMonth; day++) {
+                const currentDate = new Date(year, monthIndex, day);
+                const dayOfWeek = currentDate.getDay(); // 0 adalah Hari Minggu
+
+                if (dayOfWeek === 0 || day === totalDaysInMonth) {
+                    const startDateObj = new Date(year, monthIndex, currentStart, 0, 0, 0);
+                    const endDateObj = new Date(year, monthIndex, day, 23, 59, 59);
+
+                    weeks.push({
+                        weekNum: weekNumber,
+                        weekLabel: `M${weekNumber}`,
+                        startDate: startDateObj,
+                        endDate: endDateObj,
+                        startDayNum: currentStart,
+                        endDayNum: day
+                    });
+
+                    weekNumber++;
+                    currentStart = day + 1;
+                }
+            }
+
+            return weeks;
+        }
+
+        function renderNplWeeklyProgress(unitFilter) {
+            const container = document.getElementById('nplWeeklyProgressBarContainer');
+            const lblMonth = document.getElementById('nplWeeklyCurrentMonth');
+            if (!container) return;
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+
+            const monthNames = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+            if (lblMonth) {
+                lblMonth.textContent = `${monthNames[month]} ${year}`;
+            }
+
+            const weekRanges = getWeeklyCutoffRanges(year, month);
+            const totalWeeks = weekRanges.length;
+
+            // Parameter Target
+            let targetParams = [20, 30, 35, 15]; // Default 4 Minggu
+            if (totalWeeks === 5) {
+                targetParams = [15, 25, 30, 20, 10]; // Penyesuaian Otomatis jika 5 Minggu
+            } else if (totalWeeks !== 4) {
+                targetParams = weekRanges.map(() => Math.round(100 / totalWeeks));
+            }
+
+            // Total Beban (Target OS)
+            const filteredTarget = globalNplBasedOn.filter(item => {
+                return (unitFilter === 'ALL UNIT' || item.unit === unitFilter);
+            });
+            const totalTargetOs = filteredTarget.reduce((s, i) => s + (parseFloat(i.os) || 0), 0);
+
+            // Sisa Beban Aktual
+            const filteredDb = globalNplDb.filter(item => {
+                return (unitFilter === 'ALL UNIT' || item.unit === unitFilter);
+            });
+            const actualSisaOs = filteredDb.reduce((s, i) => s + (parseFloat(i.os) || 0), 0);
+            const totalResolvedOs = Math.max(0, totalTargetOs - actualSisaOs);
+
+            container.innerHTML = '';
+
+            let accumulativeTargetPct = 0;
+            let prevAccumulativeTargetPct = 0;
+
+            weekRanges.forEach((w, idx) => {
+                const targetPct = targetParams[idx] || 0;
+                prevAccumulativeTargetPct = accumulativeTargetPct;
+                accumulativeTargetPct += targetPct;
+
+                const targetNominalWeek = (totalTargetOs * targetPct) / 100;
+
+                // Cek status minggu berjalan vs tanggal hari ini
+                const isPastWeek = now.getTime() > w.endDate.getTime();
+                const isCurrentWeek = now.getTime() >= w.startDate.getTime() && now.getTime() <= w.endDate.getTime();
+
+                let actualAchievedPct = 0;
+                if (totalTargetOs > 0) {
+                    actualAchievedPct = (totalResolvedOs / totalTargetOs) * 100;
+                }
+
+                let barColor = "bg-blue-600";
+                let badgeStatus = `<span class="text-[10px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-md font-bold">Mendatang</span>`;
+
+                if (isPastWeek) {
+                    barColor = "bg-emerald-500";
+                    badgeStatus = `<span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-md font-bold">Selesai</span>`;
+                } else if (isCurrentWeek) {
+                    barColor = "bg-amber-500";
+                    badgeStatus = `<span class="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-md font-bold animate-pulse">Berjalan</span>`;
+                }
+
+                // LOGIKA PROGRES BERGULUNG (ROLLOVER):
+                let progressDisplayPct = 0;
+                if (actualAchievedPct >= accumulativeTargetPct) {
+                    progressDisplayPct = 100;
+                } else if (actualAchievedPct <= prevAccumulativeTargetPct) {
+                    progressDisplayPct = 0;
+                } else {
+                    progressDisplayPct = ((actualAchievedPct - prevAccumulativeTargetPct) / targetPct) * 100;
+                }
+
+                const cardHtml = `
+                    <div class="bg-white border border-slate-200/80 rounded-xl p-4 shadow-xs hover:shadow-md transition">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-extrabold text-xs text-slate-800">${w.weekLabel}</span>
+                                <span class="text-[10px] font-semibold text-slate-400">(${w.startDayNum}-${w.endDayNum} ${monthNames[month].substring(0,3)})</span>
+                            </div>
+                            ${badgeStatus}
+                        </div>
+                        <div class="flex justify-between items-end mb-1">
+                            <div>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase">Target: ${targetPct}%</span>
+                                <p class="text-xs font-bold text-slate-700">Rp ${formatRupiah(targetNominalWeek)}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] font-extrabold text-blue-900">${accumulativeTargetPct}% (Kum)</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200/60 mt-2">
+                            <div class="${barColor} h-full rounded-full transition-all duration-500" style="width: ${progressDisplayPct.toFixed(1)}%"></div>
+                        </div>
+                    </div>
+                `;
+
+                container.insertAdjacentHTML('beforeend', cardHtml);
+            });
         }
 
         function applyFiltersNplTableOnly() {
