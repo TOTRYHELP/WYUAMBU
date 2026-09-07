@@ -447,7 +447,7 @@
                         <span class="p-2 rounded-lg bg-blue-100 text-blue-700"><i class="fa-solid fa-chart-line"></i></span>
                         <div>
                             <h3 class="font-bold text-slate-800 text-sm uppercase">PROGRES BEBAN PER MINGGU (PENYELESAIAN POTENSI NPL)</h3>
-                            <p class="text-[11px] text-slate-500 font-medium">Cut-off bertemu Hari Minggu. Sisa/kelebihan capaian otomatis menggulung ke minggu berikutnya (M1: 20%, M2: 30%, M3: 35%, M4: 15%).</p>
+                            <p class="text-[11px] text-slate-500 font-medium">Cut-off bertemu Hari Minggu. Sisa/kelebihan capaian menggulung ke minggu berikutnya.</p>
                         </div>
                     </div>
                     <span id="nplWeeklyCurrentMonth" class="text-xs font-black px-3 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-200">BULAN BERJALAN</span>
@@ -1500,7 +1500,7 @@
                 let carryOverLabel = "";
 
                 if (carryOverPct > 0) {
-                    carryOverLabel = `<span class="text-[9px] text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-bold">+${carryOverPct.toFixed(1)}% Gulungan</span>`;
+                    carryOverLabel = `<span class="text-[9px] text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-bold">+${carryOverPct.toFixed(1)}% Carry Over</span>`;
                 } else if (carryOverPct < 0) {
                     carryOverLabel = `<span class="text-[9px] text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-bold">${carryOverPct.toFixed(1)}% Diskon Surplus</span>`;
                 }
