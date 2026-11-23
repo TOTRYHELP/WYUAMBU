@@ -343,9 +343,10 @@
                     </div>
                 </div>
 
-                <div id="filterResumeCard" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5 p-4 bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white rounded-2xl shadow-md border border-emerald-500/30">
+                <!-- RESUME CARDS FILTER DETAIL + CARD BELUM REALISASI -->
+                <div id="filterResumeCard" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5 p-4 bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white rounded-2xl shadow-md border border-emerald-500/30">
                     <div class="flex items-center gap-3.5 bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/10">
-                        <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center justify-center text-lg">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center justify-center text-lg shrink-0">
                             <i class="fa-solid fa-file-invoice"></i>
                         </div>
                         <div>
@@ -354,12 +355,30 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-3.5 bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/10">
-                        <div class="w-10 h-10 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-400/30 flex items-center justify-center text-lg">
+                        <div class="w-10 h-10 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-400/30 flex items-center justify-center text-lg shrink-0">
                             <i class="fa-solid fa-money-bill-trend-up"></i>
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-teal-300 uppercase tracking-widest">Total Plafond</p>
                             <p id="filteredPlafond" class="text-xl font-black text-white mt-0.5">0</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3.5 bg-amber-400/15 backdrop-blur-md p-3.5 rounded-xl border border-amber-300/30">
+                        <div class="w-10 h-10 rounded-lg bg-amber-400/25 text-amber-200 border border-amber-300/40 flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid fa-hourglass-half"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-amber-200 uppercase tracking-widest">Total NOA Belum Realisasi</p>
+                            <p id="filteredBelumRealisasiNoa" class="text-xl font-black text-amber-100 mt-0.5">0</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3.5 bg-amber-400/15 backdrop-blur-md p-3.5 rounded-xl border border-amber-300/30">
+                        <div class="w-10 h-10 rounded-lg bg-amber-400/25 text-amber-200 border border-amber-300/40 flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid fa-coins"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-amber-200 uppercase tracking-widest">Total Plafond Belum Realisasi</p>
+                            <p id="filteredBelumRealisasiPlafond" class="text-xl font-black text-amber-100 mt-0.5">0</p>
                         </div>
                     </div>
                 </div>
@@ -375,10 +394,12 @@
                                 <th class="p-3">AOM</th>
                                 <th class="p-3">NAMA NASABAH</th>
                                 <th class="p-3 text-right">PLAFOND</th>
+                                <th class="p-3 text-right">PLAFOND MPPM</th>
+                                <th class="p-3">TANGGAL REALISASI</th>
                             </tr>
                         </thead>
                         <tbody id="tableDetailedData" class="divide-y divide-slate-200 bg-white">
-                            <tr><td colspan="7" class="text-center py-8 text-slate-400">Loading...</td></tr>
+                            <tr><td colspan="9" class="text-center py-8 text-slate-400">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1203,26 +1224,51 @@
             document.getElementById('recordCount').textContent = `${filtered.length} Transaksi Found`;
             const totalFilteredPlafond = filtered.reduce((s, i) => s + (parseFloat(i.plafond) || 0), 0);
             
+            // Hitung Total NOA & Total Plafond (dari Kolom H) untuk yang statusnya "BELUM REALISASI"
+            const belumRealisasiItems = filtered.filter(i => {
+                const statusVal = String(i.status || '').trim().toUpperCase();
+                const realisasiVal = String(i.tanggalRealisasi || '').trim().toUpperCase();
+                return statusVal === 'BELUM REALISASI' || realisasiVal === 'BELUM REALISASI';
+            });
+            const totalBelumRealisasiNoa = belumRealisasiItems.length;
+            const totalBelumRealisasiPlafond = belumRealisasiItems.reduce((s, i) => s + (parseFloat(i.plafondMppm) || 0), 0);
+
             document.getElementById('filteredNoa').textContent = filtered.length;
             document.getElementById('filteredPlafond').textContent = formatRupiah(totalFilteredPlafond);
+            document.getElementById('filteredBelumRealisasiNoa').textContent = totalBelumRealisasiNoa.toLocaleString('id-ID');
+            document.getElementById('filteredBelumRealisasiPlafond').textContent = formatRupiah(totalBelumRealisasiPlafond);
 
             tbody.innerHTML = '';
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400 text-xs">Data transaksi tidak ditemukan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400 text-xs">Data transaksi tidak ditemukan.</td></tr>`;
                 return;
             }
 
             filtered.forEach((item, index) => {
+                const statusStr = String(item.status || '').trim().toUpperCase();
+                const realisasiStr = String(item.tanggalRealisasi || '').trim().toUpperCase();
+                const isBelumRealisasi = (statusStr === 'BELUM REALISASI' || realisasiStr === 'BELUM REALISASI');
+
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-blue-50/30 transition border-b border-slate-100 text-xs";
+                // Spotlight warna kuning pastel bila baris mengandung "BELUM REALISASI"
+                tr.className = isBelumRealisasi
+                    ? "bg-[#FEF9C3] hover:bg-[#FEF08A]/80 transition border-b border-amber-200/80 text-xs"
+                    : "hover:bg-blue-50/30 transition border-b border-slate-100 text-xs";
+
+                const displayTglRealisasi = isBelumRealisasi
+                    ? `<span class="px-2 py-0.5 rounded bg-amber-200/80 text-amber-900 font-bold text-[10px]">BELUM REALISASI</span>`
+                    : formatDateIndoShort(item.tanggalRealisasi);
+
                 tr.innerHTML = `
-                    <td class="p-3 text-center text-slate-400 font-medium">${index + 1}</td>
+                    <td class="p-3 text-center text-slate-500 font-medium">${index + 1}</td>
                     <td class="p-3 font-medium text-slate-600 whitespace-nowrap">${formatDateIndoShort(item.tanggal)}</td>
                     <td class="p-3 font-semibold text-slate-800">${item.unit || '-'}</td>
                     <td class="p-3 text-center font-mono text-slate-500">${item.kode || '-'}</td>
                     <td class="p-3 font-medium text-slate-700">${getShortName(item.aom) || '-'}</td>
                     <td class="p-3 font-semibold text-slate-900">${item.nasabah || '-'}</td>
                     <td class="p-3 text-right font-extrabold text-blue-900 whitespace-nowrap">${formatRupiah(item.plafond || 0)}</td>
+                    <td class="p-3 text-right font-extrabold text-emerald-800 whitespace-nowrap">${formatRupiah(item.plafondMppm || 0)}</td>
+                    <td class="p-3 font-medium text-slate-700 whitespace-nowrap">${displayTglRealisasi}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1399,7 +1445,6 @@
             let currentStart = 1;
             for (let day = 1; day <= totalDays; day++) {
                 const dateObj = new Date(year, monthIndex, day);
-                // Cut-off setiap bertemu Hari Minggu (getDay() === 0) atau Hari Terakhir Bulan
                 if (dateObj.getDay() === 0 || day === totalDays) {
                     rawWeeks.push({
                         startDayNum: currentStart,
@@ -1412,10 +1457,6 @@
                 }
             }
 
-            // ATURAN SEMAINGGU / CUT OFF:
-            // 1. KEKURANGAN DIAWAL BULAN (TIDAK GENAP 7 HARI):
-            //    - KURANG DARI 4 HARI (< 4) -> DIGABUNG KE M1
-            //    - LEBIH DARI 3 HARI (>= 4) -> JADI M1
             if (rawWeeks.length > 0 && rawWeeks[0].daysCount < 4) {
                 if (rawWeeks.length > 1) {
                     rawWeeks[1].startDayNum = rawWeeks[0].startDayNum;
@@ -1425,9 +1466,6 @@
                 }
             }
 
-            // 2. KEKURANGAN DIAKHIR BULAN (TIDAK GENAP 7 HARI):
-            //    - KURANG DARI 4 HARI (< 4) -> DIGABUNG KE M4
-            //    - LEBIH DARI 3 HARI (>= 4) -> JADI M4
             if (rawWeeks.length > 4) {
                 const lastIdx = rawWeeks.length - 1;
                 if (rawWeeks[lastIdx].daysCount < 4) {
@@ -1438,8 +1476,6 @@
                 }
             }
 
-            // Jika masih terdapat lebih dari 4 blok minggu (karena tidak ada yang < 4 hari),
-            // gabungkan blok sisa secara aman agar pas tepat 4 Minggu (M1..M4)
             while (rawWeeks.length > 4) {
                 const lastIdx = rawWeeks.length - 1;
                 rawWeeks[lastIdx - 1].endDayNum = rawWeeks[lastIdx].endDayNum;
@@ -1448,7 +1484,7 @@
                 rawWeeks.pop();
             }
 
-            const basePcts = [20, 30, 35, 15]; // M1=20%, M2=30%, M3=35%, M4=15%
+            const basePcts = [20, 30, 35, 15];
 
             return rawWeeks.map((w, idx) => ({
                 weekLabel: `M${idx + 1}`,
@@ -1476,7 +1512,6 @@
 
             const weekRanges = getSundayCutoffFourWeeks(year, month);
 
-            // Perhitungan Total Beban OS & Capaian Riil
             const filteredTarget = globalNplBasedOn.filter(item => {
                 return (unitFilter === 'ALL UNIT' || item.unit === unitFilter);
             });
@@ -1490,17 +1525,15 @@
 
             container.innerHTML = '';
 
-            let carryOverPct = 0; // Menggulung / menyesuaikan persentase beban ke minggu berikutnya
+            let carryOverPct = 0;
 
             weekRanges.forEach((w) => {
                 const isPastWeek = now.getTime() > w.endDate.getTime();
                 const isCurrentWeek = now.getTime() >= w.startDate.getTime() && now.getTime() <= w.endDate.getTime();
 
-                // Target Efektif Minggu Ini (Base Target % + Gulungan/Penyesuaian Minggu Lalu)
                 const effectiveTargetPct = Math.max(0, w.baseTargetPct + carryOverPct);
                 const targetNominalWeek = (totalTargetOs * effectiveTargetPct) / 100;
 
-                // Realisasi Aktual Capaian Minggu Ini
                 let actualCapaiNominal = 0;
                 let actualCapaiPct = 0;
 
@@ -1509,7 +1542,6 @@
                     actualCapaiPct = totalTargetOs > 0 ? (totalResolvedOs / totalTargetOs) * 100 : 0;
                 }
 
-                // Evaluasi Capaian
                 const isAchieved = actualCapaiPct >= effectiveTargetPct;
                 let carryOverLabel = "";
 
@@ -1519,12 +1551,10 @@
                     carryOverLabel = `<span class="text-[9px] text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-bold">${carryOverPct.toFixed(1)}% Diskon Surplus</span>`;
                 }
 
-                // Kalkulasi Gulungan Beban untuk Minggu Selanjutnya
                 if (isPastWeek) {
-                    carryOverPct = effectiveTargetPct - actualCapaiPct; // Positif (menambah beban) / Negatif (mengurangi beban)
+                    carryOverPct = effectiveTargetPct - actualCapaiPct;
                 }
 
-                // Penentuan Status Badge Card
                 let badgeStatus = `<span class="text-[10px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-md font-bold">Mendatang</span>`;
                 let achievementBadge = `<span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold border border-slate-200">-</span>`;
                 let barColor = "bg-blue-600";
@@ -1550,7 +1580,6 @@
                     }
                 }
 
-                // Tampilan Panjang Progress Bar
                 let progressDisplayPct = effectiveTargetPct > 0 ? Math.min(100, (actualCapaiPct / effectiveTargetPct) * 100) : (actualCapaiPct > 0 ? 100 : 0);
 
                 const cardHtml = `
@@ -1672,42 +1701,34 @@
 
             if (!targetScope || !targetContainer) return;
 
-            // Indikator Loading di Tombol
             const originalBtnHtml = btn.innerHTML;
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Processing...</span>`;
             btn.disabled = true;
 
-            // Simpan class max-height bawaan untuk dikembalikan nanti
             const originalMaxHeight = targetContainer.style.maxHeight;
             const originalOverflow = targetContainer.style.overflow;
 
             try {
-                // Hapus sementara batas height agar SELURUH ISI TABEL DAN PROGRES TERCAPTURE
                 targetContainer.style.maxHeight = 'none';
                 targetContainer.style.overflow = 'visible';
 
-                // Gunakan html2canvas untuk merender seluruh cakupan
                 const canvas = await html2canvas(targetScope, {
-                    scale: 2, // Resolusi tinggi
+                    scale: 2,
                     backgroundColor: '#f8fafc',
                     useCORS: true,
                     logging: false
                 });
 
-                // Kembalikan style container seperti semula
                 targetContainer.style.maxHeight = originalMaxHeight;
                 targetContainer.style.overflow = originalOverflow;
 
-                // Konversi Canvas ke Data URL Image JPG
                 const imageJPG = canvas.toDataURL('image/jpeg', 0.95);
 
-                // Buat tanggal unik untuk nama file download
                 const now = new Date();
                 const selectedUnit = document.getElementById('nplFilterUnit').value.replace(/[^a-zA-Z0-9]/g, '_');
                 const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
                 const fileName = `Monitoring_NPL_Lengkap_${selectedUnit}_${dateStr}.jpg`;
 
-                // Auto Download File JPG
                 const link = document.createElement('a');
                 link.href = imageJPG;
                 link.download = fileName;
@@ -1719,11 +1740,9 @@
                 console.error("Gagal melakukan capture NPL:", error);
                 alert("Terjadi kesalahan saat memproses gambar. Silakan coba lagi.");
             } finally {
-                // Kembalikan style container jika gagal di tengah jalan
                 targetContainer.style.maxHeight = originalMaxHeight;
                 targetContainer.style.overflow = originalOverflow;
 
-                // Restorasi tombol
                 btn.innerHTML = originalBtnHtml;
                 btn.disabled = false;
             }
