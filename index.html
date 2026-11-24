@@ -723,6 +723,12 @@
             return null;
         }
 
+        function isItemBelumRealisasi(item) {
+            const statusVal = String(item.status || '').trim().toUpperCase();
+            const realisasiVal = String(item.tanggalRealisasi || '').trim().toUpperCase();
+            return statusVal === 'BELUM REALISASI' || realisasiVal === 'BELUM REALISASI';
+        }
+
         function updateLastRefreshLog() {
             const now = new Date();
             const days = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
@@ -898,7 +904,9 @@
                 let ts = parseToTimestamp(item.tanggal);
                 if (ts && ts >= prevMinBound && ts <= prevMaxBound) {
                     totalPlafondPrev += (parseFloat(item.plafond) || 0);
-                    totalNoaPrev += 1;
+                    if (!isItemBelumRealisasi(item)) {
+                        totalNoaPrev += 1;
+                    }
                 }
             });
 
@@ -916,7 +924,7 @@
 
         function renderLendingComponents() {
             const totalLending = currentLendingDateFiltered.reduce((s, i) => s + (parseFloat(i.plafond) || 0), 0);
-            const totalNOA = currentLendingDateFiltered.length;
+            const totalNOA = currentLendingDateFiltered.filter(i => !isItemBelumRealisasi(i)).length;
 
             document.getElementById('cardTotalLending').textContent = formatRupiah(totalLending);
             document.getElementById('cardTotalNOA').textContent = totalNOA.toLocaleString('id-ID');
@@ -934,7 +942,9 @@
                 const u = i.unit || '';
                 if (unitStats[u]) {
                     unitStats[u].total += (parseFloat(i.plafond) || 0);
-                    unitStats[u].noa += 1;
+                    if (!isItemBelumRealisasi(i)) {
+                        unitStats[u].noa += 1;
+                    }
                 }
             });
 
@@ -954,7 +964,9 @@
                 const a = getShortName(i.aom || 'Lainnya');
                 if (!aomStats[a]) aomStats[a] = { aom: a, total: 0, noa: 0 };
                 aomStats[a].total += (parseFloat(i.plafond) || 0);
-                aomStats[a].noa += 1;
+                if (!isItemBelumRealisasi(i)) {
+                    aomStats[a].noa += 1;
+                }
             });
             const sortedAoms = Object.values(aomStats).sort((a,b) => b.total - a.total || b.noa - a.noa);
 
@@ -1233,15 +1245,12 @@
             document.getElementById('recordCount').textContent = `${filtered.length} Transaksi Found`;
             const totalFilteredPlafond = filtered.reduce((s, i) => s + (parseFloat(i.plafond) || 0), 0);
             
-            const belumRealisasiItems = filtered.filter(i => {
-                const statusVal = String(i.status || '').trim().toUpperCase();
-                const realisasiVal = String(i.tanggalRealisasi || '').trim().toUpperCase();
-                return statusVal === 'BELUM REALISASI' || realisasiVal === 'BELUM REALISASI';
-            });
+            const belumRealisasiItems = filtered.filter(i => isItemBelumRealisasi(i));
+            const totalRealisasiNoa = filtered.length - belumRealisasiItems.length;
             const totalBelumRealisasiNoa = belumRealisasiItems.length;
             const totalBelumRealisasiPlafond = belumRealisasiItems.reduce((s, i) => s + (parseFloat(i.plafondMppm) || 0), 0);
 
-            document.getElementById('filteredNoa').textContent = filtered.length;
+            document.getElementById('filteredNoa').textContent = totalRealisasiNoa.toLocaleString('id-ID');
             document.getElementById('filteredPlafond').textContent = formatRupiah(totalFilteredPlafond);
             document.getElementById('filteredBelumRealisasiNoa').textContent = totalBelumRealisasiNoa.toLocaleString('id-ID');
             document.getElementById('filteredBelumRealisasiPlafond').textContent = formatRupiah(totalBelumRealisasiPlafond);
@@ -1253,9 +1262,7 @@
             }
 
             filtered.forEach((item, index) => {
-                const statusStr = String(item.status || '').trim().toUpperCase();
-                const realisasiStr = String(item.tanggalRealisasi || '').trim().toUpperCase();
-                const isBelumRealisasi = (statusStr === 'BELUM REALISASI' || realisasiStr === 'BELUM REALISASI');
+                const isBelumRealisasi = isItemBelumRealisasi(item);
 
                 const tr = document.createElement('tr');
                 tr.className = isBelumRealisasi
