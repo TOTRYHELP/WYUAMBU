@@ -650,7 +650,8 @@
             "MOCHAMAD HARIS WIDAYATNO": "HARIS",
             "YUSUF BINTANG SYAIFINUHA": "BINTANG",
             "KIKI SANTOSO": "KIKI",
-            "KURNIAWAN AGUNG NUGRAHA": "AGUNG"
+            "KURNIAWAN AGUNG NUGRAHA": "AGUNG",
+            "DANAR LISTIYAN": "DANAR"
         };
 
         function getShortName(fullName) {
@@ -961,12 +962,11 @@
             }
 
             currentLendingDateFiltered.forEach(i => {
+                if (isItemBelumRealisasi(i)) return;
                 const a = getShortName(i.aom || 'Lainnya');
                 if (!aomStats[a]) aomStats[a] = { aom: a, total: 0, noa: 0 };
                 aomStats[a].total += (parseFloat(i.plafond) || 0);
-                if (!isItemBelumRealisasi(i)) {
-                    aomStats[a].noa += 1;
-                }
+                aomStats[a].noa += 1;
             });
             const sortedAoms = Object.values(aomStats).sort((a,b) => b.total - a.total || b.noa - a.noa);
 
